@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which of your dependencies have no wheel for Python 3.15 yet?</title>
+<meta name="description" content="Python 3.15 is out and free-threading is supported. Here is why upgrades stall on wheels, and a tool that tells you exactly which ones.">
+<link rel="canonical" href="https://blackman99.github.io/wheelripe/blog/which-dependencies-block-python-3-15.html">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../logo-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="../logo-512.png">
+<meta name="theme-color" content="#e8742a">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="wheelripe">
+<meta property="og:title" content="Which of your dependencies have no wheel for Python 3.15 yet?">
+<meta property="og:description" content="Python 3.15 is out and free-threading is supported. Here is why upgrades stall on wheels, and a tool that tells you exactly which ones.">
+<meta property="og:url" content="https://blackman99.github.io/wheelripe/blog/which-dependencies-block-python-3-15.html">
+<meta property="og:image" content="https://blackman99.github.io/wheelripe/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A cheese wedge whose holes are Python packages with no cp315 wheel yet.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Which of your dependencies have no wheel for Python 3.15 yet?">
+<meta name="twitter:description" content="Python 3.15 is out and free-threading is supported. Here is why upgrades stall on wheels, and a tool that tells you exactly which ones.">
+<meta name="twitter:image" content="https://blackman99.github.io/wheelripe/og.png">
+<link rel="preload" href="../fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="band">
+  <a class="brand" href="../"><img src="../favicon.svg" width="30" height="30" alt=""> wheelripe</a>
+  <nav aria-label="Site"><a href="../docs/">Docs</a><a href="../blog/">Notes</a><a href="https://github.com/Blackman99/wheelripe">GitHub</a></nav>
+</header>
+<main id="main" class="page article"><p class="kicker">Notes · 2026-10-13</p><h1>Which of your dependencies have no wheel for Python 3.15 yet?</h1>
+<p class="lede">CPython 3.15 shipped in October 2026, and the free-threaded build (3.15t) is now supported. Within days the same issue appears on dozens of trackers: “add Python 3.15 support”, followed by a hand-made list of which dependencies do and do not have wheels yet.</p>
+<h2>The question nobody's tooling answers</h2>
+<p>Look at <a href="https://github.com/tconbeer/harlequin/issues/1119">harlequin#1119</a> or <a href="https://github.com/jaehyeon-kim/dynamic-des/issues/40">dynamic-des#40</a>: maintainers open PyPI for each dependency, scroll the file list and look for <code>cp315</code>. Then they do it again for 3.15t, where <code>abi3</code> wheels do not count. Then again for macOS and Windows. Then again next week.</p>
+<p>pip does not help much: it stops at the first package that needs a compiler, needs the target interpreter on each OS, and never says which newer release would have worked. Dependabot and Renovate bump versions but do not know about wheel tags.</p>
+<h2>What wheelripe does</h2>
+<p>It reads your lockfile (uv, PEP 751, Poetry, Pipenv, requirements, pyproject) and fetches each package's file list from the PyPI JSON API — one request per package. For each target platform it applies the same tag rules pip uses: interpreter, ABI (including PEP 803 <code>abi3t</code>), and platform with your glibc/macOS floor.</p>
+<div class="rind"><pre><code>$ uvx --from git+https://github.com/Blackman99/wheelripe wheelripe uv.lock -p 3.15
+BLOCKED  confluent-kafka 2.16.0          no cp315 wheel for any target platform (ships cp38–cp314)
+BUMP     numpy 1.26.4 → 2.5.2            no cp315 wheel in 1.26.4 (ships cp39–cp312); 2.5.2 is the first release with one
+NOT RIPE for CPython 3.15: 1 blocked upstream · 1 needs a version bump</code></pre></div>
+<p>The useful distinction is <b>bump</b> versus <b>blocked</b>. A bump you can do today. A blocker you wait on — the report links the upstream project so you can watch it.</p>
+<h2>Trusting the answer</h2>
+<p>Tag matching has corners: manylinux floors, legacy aliases, universal2, abi3 on free-threaded builds, compressed tag sets. So wheelripe's CI asks pip itself (<code>--dry-run --only-binary=:all:</code> with explicit Python/ABI/platform) about 26 real packages on 7 platforms for both 3.15 and 3.15t, and installs on real 3.15/3.15t interpreters. Any disagreement turns CI red.</p>
+<h2>Make CI tell you</h2>
+<div class="rind"><pre><code>- uses: Blackman99/wheelripe@v0.1.0
+  with:
+    python-version: &quot;3.15t&quot;
+    fail-on: blocked</code></pre></div>
+<p>Run it weekly. The job goes green the week your last blocker ships a wheel. There is also an MCP server so a coding agent can check before it touches <code>requires-python</code>.</p>
+<p><a href="../docs/">Docs</a> · <a href="https://github.com/Blackman99/wheelripe">GitHub</a></p>
+</main><footer class="foot"><p>wheelripe · MIT · <a href="https://github.com/Blackman99/wheelripe">GitHub</a> · <a href="https://github.com/Blackman99/wheelripe/issues">Issues</a></p></footer>
+</body>
+</html>

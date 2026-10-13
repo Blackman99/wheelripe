@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install · wheelripe docs</title>
+<meta name="description" content="uvx, pipx, pip, the release wheel, or nothing at all in CI.">
+<link rel="canonical" href="https://blackman99.github.io/wheelripe/docs/install.html">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../logo-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="../logo-512.png">
+<meta name="theme-color" content="#e8742a">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="wheelripe">
+<meta property="og:title" content="Install · wheelripe docs">
+<meta property="og:description" content="uvx, pipx, pip, the release wheel, or nothing at all in CI.">
+<meta property="og:url" content="https://blackman99.github.io/wheelripe/docs/install.html">
+<meta property="og:image" content="https://blackman99.github.io/wheelripe/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A cheese wedge whose holes are Python packages with no cp315 wheel yet.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Install · wheelripe docs">
+<meta name="twitter:description" content="uvx, pipx, pip, the release wheel, or nothing at all in CI.">
+<meta name="twitter:image" content="https://blackman99.github.io/wheelripe/og.png">
+<link rel="preload" href="../fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="band">
+  <a class="brand" href="../"><img src="../favicon.svg" width="30" height="30" alt=""> wheelripe</a>
+  <nav aria-label="Site"><a href="../docs/">Docs</a><a href="../blog/">Notes</a><a href="https://github.com/Blackman99/wheelripe">GitHub</a></nav>
+</header>
+<div class="docs"><nav class="side" aria-label="Docs"><ol><li><a href="./"><i aria-hidden="true"></i>Overview</a></li><li><a href="install.html" aria-current="page"><i aria-hidden="true"></i>Install</a></li><li><a href="usage.html"><i aria-hidden="true"></i>Usage</a></li><li><a href="configuration.html"><i aria-hidden="true"></i>Configuration</a></li><li><a href="reference.html"><i aria-hidden="true"></i>Reference</a></li><li><a href="faq.html"><i aria-hidden="true"></i>FAQ</a></li></ol></nav><main id="main" class="page">
+<h1>Install</h1>
+<p class="lede">wheelripe is a small pure-Python package (one dependency: <code>packaging</code>). It runs on Python 3.9+ — the interpreter you run it with does not need to be the one you are targeting.</p>
+<h2 id="uvx">Run once with uvx</h2>
+<div class="rind"><pre><code>uvx --from git+https://github.com/Blackman99/wheelripe wheelripe
+<span class="c"># pin a release</span>
+uvx --from git+https://github.com/Blackman99/wheelripe@v0.1.0 wheelripe uv.lock -p 3.15t</code></pre></div>
+<h2 id="pipx">Install with pipx</h2>
+<div class="rind"><pre><code>pipx install git+https://github.com/Blackman99/wheelripe
+wheelripe --version</code></pre></div>
+<h2 id="wheel">From the release wheel</h2>
+<p>Every <a href="https://github.com/Blackman99/wheelripe/releases">GitHub Release</a> carries the wheel and sdist built in CI:</p>
+<div class="rind"><pre><code>pip install https://github.com/Blackman99/wheelripe/releases/download/v0.1.0/wheelripe-0.1.0-py3-none-any.whl</code></pre></div>
+<p class="note">wheelripe is not on PyPI yet; until it is, install from GitHub as above. The commands stay the same once it is.</p>
+<h2 id="ci">In CI</h2>
+<p>Nothing to install — use the <a href="usage.html#github-action">GitHub Action</a>. It creates its own virtualenv, so it never touches the Python your job uses.</p>
+<h2 id="network">Network</h2>
+<p>wheelripe makes one HTTPS request per package to the PyPI JSON API (<code>https://pypi.org/pypi/&lt;name&gt;/json</code>), eight in parallel by default. Behind a proxy, the usual <code>HTTPS_PROXY</code> variable is honoured. For a mirror that serves the same JSON API, see <a href="configuration.html#index">--index</a>.</p>
+<p class="next"><a href="usage.html">Usage →</a></p>
+</main></div><footer class="foot"><p>wheelripe · MIT · <a href="https://github.com/Blackman99/wheelripe">GitHub</a> · <a href="https://github.com/Blackman99/wheelripe/issues">Issues</a></p></footer>
+</body>
+</html>

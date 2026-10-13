@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'Bagel Fat One';src:url(../site/fonts/bagel-fat-one-400.woff2) format('woff2')}
+@font-face{font-family:'Bricolage Grotesque';font-weight:200 800;src:url(../site/fonts/bricolage-grotesque.woff2) format('woff2')}
+@font-face{font-family:'Reddit Mono';font-weight:200 900;src:url(../site/fonts/reddit-mono.woff2) format('woff2')}
+html,body{margin:0;width:100vw;height:100vh;overflow:hidden;background:#e8742a;color:#2a160b}
+svg.bg{position:absolute;inset:0;width:100%;height:100%}
+.brand{position:absolute;left:5.2vw;top:6.5vh;display:flex;align-items:center;gap:1.2vw;font:400 4.1vw 'Bagel Fat One'}
+.brand img{width:4.6vw;height:4.6vw}
+.tag{position:absolute;left:5.2vw;top:21vh;font:600 1.75vw/1.35 'Bricolage Grotesque';max-width:34vw}
+h1{position:absolute;right:4.6vw;bottom:11vh;margin:0;font:400 5.3vw/1.0 'Bagel Fat One';text-align:left;width:52vw}
+.eye{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:.5vh;font:600 1.3vw 'Reddit Mono'}
+.eye i{display:block;border-radius:50%;background:#6e2c0e;box-shadow:inset 0 -0.5vw 0 #a8471a}
+.eye b{font-weight:600;color:#2b5f73}
+.verdict{position:absolute;right:4.6vw;bottom:3.4vh;font:600 1.45vw 'Reddit Mono';width:52vw}
+.verdict span{background:#2a160b;color:#ffd978;border-radius:99px;padding:.15em .6em}
+</style></head><body>
+<svg class="bg" viewBox="0 0 1200 630" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M1212 40 L1212 642 L-12 642 L-12 420 Z" fill="#ffd978"/>
+  <path d="M1172 43.5 L1212 40 L1212 642 L1172 642 Z" fill="#a8471a"/>
+  <g fill="#a8471a" opacity=".38">
+    <ellipse cx="140" cy="560" rx="5" ry="3.5"/><ellipse cx="300" cy="470" rx="3" ry="2"/><ellipse cx="420" cy="590" rx="6" ry="4"/>
+    <ellipse cx="560" cy="410" rx="4" ry="3"/><ellipse cx="760" cy="250" rx="5" ry="3.5"/><ellipse cx="1080" cy="160" rx="3" ry="2"/>
+    <ellipse cx="980" cy="300" rx="6" ry="4"/><ellipse cx="640" cy="330" rx="3" ry="2"/><ellipse cx="240" cy="600" rx="4" ry="3"/>
+    <ellipse cx="880" cy="200" rx="4" ry="3"/><ellipse cx="60" cy="600" rx="3" ry="2"/><ellipse cx="1120" cy="420" rx="4" ry="3"/>
+  </g>
+</svg>
+<div class="brand"><img src="../site/logo.svg" alt="">wheelripe</div>
+<div class="tag">Check your lockfile against PyPI before you move to a new CPython.</div>
+<div id="eyes"></div>
+<h1>Which of your dependencies have no wheel for Python&nbsp;3.15 yet?</h1>
+<div class="verdict"><span>NOT RIPE</span> 5 blocked · 8 need a bump · 3 ready</div>
+<script>
+// x%, y%, diameter (vw), name, fix
+const E=[[60,30,5.6,'confluent-kafka',''],[73,23,4.8,'orjson',''],[86,17,3.4,'numpy','→ 2.5.2'],[90,34,5.2,'onnxruntime',''],
+ [8,80,3.0,'lxml','→ 6.1.2'],[19,73,4.4,'pyyaml',''],[30,82,3.2,'msgpack','→ 1.2.2'],[31,58,2.8,'regex','→ 2026.9.3'],[79,42,1.0,'six','']];
+const box=document.getElementById('eyes');
+for(const [x,y,d,n,f] of E){const e=document.createElement('div');e.className='eye';e.style.left=x+'vw';e.style.top=y+'vh';
+ e.innerHTML=`<i style="width:${d}vw;height:${d*.78}vw;${d<1.5?'background:#a8471a;opacity:.5;box-shadow:none':''}"></i>${n}${f?`<b>${f}</b>`:''}`;box.appendChild(e);}
+</script>
+</body></html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FAQ · wheelripe docs</title>
+<meta name="description" content="Why not just run pip? What about abi3? Is it ever wrong?">
+<link rel="canonical" href="https://blackman99.github.io/wheelripe/docs/faq.html">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../logo-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="../logo-512.png">
+<meta name="theme-color" content="#e8742a">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="wheelripe">
+<meta property="og:title" content="FAQ · wheelripe docs">
+<meta property="og:description" content="Why not just run pip? What about abi3? Is it ever wrong?">
+<meta property="og:url" content="https://blackman99.github.io/wheelripe/docs/faq.html">
+<meta property="og:image" content="https://blackman99.github.io/wheelripe/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A cheese wedge whose holes are Python packages with no cp315 wheel yet.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="FAQ · wheelripe docs">
+<meta name="twitter:description" content="Why not just run pip? What about abi3? Is it ever wrong?">
+<meta name="twitter:image" content="https://blackman99.github.io/wheelripe/og.png">
+<link rel="preload" href="../fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="band">
+  <a class="brand" href="../"><img src="../favicon.svg" width="30" height="30" alt=""> wheelripe</a>
+  <nav aria-label="Site"><a href="../docs/">Docs</a><a href="../blog/">Notes</a><a href="https://github.com/Blackman99/wheelripe">GitHub</a></nav>
+</header>
+<div class="docs"><nav class="side" aria-label="Docs"><ol><li><a href="./"><i aria-hidden="true"></i>Overview</a></li><li><a href="install.html"><i aria-hidden="true"></i>Install</a></li><li><a href="usage.html"><i aria-hidden="true"></i>Usage</a></li><li><a href="configuration.html"><i aria-hidden="true"></i>Configuration</a></li><li><a href="reference.html"><i aria-hidden="true"></i>Reference</a></li><li><a href="faq.html" aria-current="page"><i aria-hidden="true"></i>FAQ</a></li></ol></nav><main id="main" class="page">
+<h1>FAQ</h1>
+<h2 id="pip">Why not just run <code>pip install</code> on the new Python?</h2>
+<p>You can, and you should eventually. But pip stops at the first package that needs a compiler, tells you nothing about the others, needs the target interpreter and each OS, and never tells you which newer version would have worked. wheelripe answers for every package and every platform at once, from any machine, in a couple of seconds.</p>
+<h2 id="right">How do I know it agrees with pip?</h2>
+<p>CI checks it against pip itself on every push: for 26 real packages on 7 platforms, for both 3.15 and 3.15t, it asks <code>pip install --dry-run --only-binary=:all: --python-version … --abi … --platform …</code> and fails on any disagreement. Then it installs on real CPython 3.15 and 3.15t interpreters and compares again.</p>
+<h2 id="abi3">My package ships abi3 wheels. Is it ready for 3.15t?</h2>
+<p>No. <code>abi3</code> is the stable ABI of GIL-enabled builds; free-threaded CPython cannot load it. PEP 803 adds <code>abi3t</code> for that, starting at 3.14. A wheel tagged <code>abi3.abi3t</code> works on both. wheelripe applies the PEP 803 table exactly.</p>
+<h2 id="glibc">It says BLOCKED, but I can see a cp315 wheel on PyPI.</h2>
+<p>Check the platform tag. If it is <code>manylinux_2_39</code> and your floor is 2.34 (the default), pip on your servers will not use it. The report says “wheels exist for a newer glibc”; raise <code>--glibc</code> if your hosts really are newer.</p>
+<h2 id="build">Is BUILD bad?</h2>
+<p>Not necessarily. Many pure-Python packages publish only an sdist; they build in seconds with no compiler. It counts as a failure only with <code>--fail-on build</code>.</p>
+<h2 id="pypi">Does it need PyPI?</h2>
+<p>It needs an index that speaks the PyPI JSON API. Artifactory, Nexus and devpi mirrors of PyPI usually do; point <code>--index</code> at them.</p>
+<h2 id="lock">Does it change my lockfile?</h2>
+<p>No. It only reads. The suggested bump is printed; you apply it with your own tool (<code>uv lock --upgrade-package numpy</code>, etc.).</p>
+<h2 id="other">Other interpreters?</h2>
+<p>CPython only for now — that is where the per-version wheel problem lives. PyPy and GraalPy are possible later.</p>
+<h2 id="name">Why cheese?</h2>
+<p>Python wheels are named after cheese wheels, and PyPI was once called the Cheese Shop. A ripe Emmental has holes; so does a lockfile on a brand-new Python.</p>
+<p class="next"><a href="https://github.com/Blackman99/wheelripe/issues">Ask something else →</a></p>
+</main></div><footer class="foot"><p>wheelripe · MIT · <a href="https://github.com/Blackman99/wheelripe">GitHub</a> · <a href="https://github.com/Blackman99/wheelripe/issues">Issues</a></p></footer>
+</body>
+</html>

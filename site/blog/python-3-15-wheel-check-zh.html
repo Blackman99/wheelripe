@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>升级 Python 3.15 前，先查清哪些依赖还没有 wheel</title>
+<meta name="description" content="3.15 发布、3.15t 自由线程转正之后，升级卡在哪？wheelripe 一次查完整个 lockfile。">
+<link rel="canonical" href="https://blackman99.github.io/wheelripe/blog/python-3-15-wheel-check-zh.html">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../logo-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="../logo-512.png">
+<meta name="theme-color" content="#e8742a">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="wheelripe">
+<meta property="og:title" content="升级 Python 3.15 前，先查清哪些依赖还没有 wheel">
+<meta property="og:description" content="3.15 发布、3.15t 自由线程转正之后，升级卡在哪？wheelripe 一次查完整个 lockfile。">
+<meta property="og:url" content="https://blackman99.github.io/wheelripe/blog/python-3-15-wheel-check-zh.html">
+<meta property="og:image" content="https://blackman99.github.io/wheelripe/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A cheese wedge whose holes are Python packages with no cp315 wheel yet.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="升级 Python 3.15 前，先查清哪些依赖还没有 wheel">
+<meta name="twitter:description" content="3.15 发布、3.15t 自由线程转正之后，升级卡在哪？wheelripe 一次查完整个 lockfile。">
+<meta name="twitter:image" content="https://blackman99.github.io/wheelripe/og.png">
+<link rel="preload" href="../fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="band">
+  <a class="brand" href="../"><img src="../favicon.svg" width="30" height="30" alt=""> wheelripe</a>
+  <nav aria-label="Site"><a href="../docs/">Docs</a><a href="../blog/">Notes</a><a href="https://github.com/Blackman99/wheelripe">GitHub</a></nav>
+</header>
+<main id="main" class="page article"><p class="kicker">Notes · 2026-10-13</p><h1>升级 Python 3.15 前，先查清哪些依赖还没有 wheel</h1>
+<p class="lede">2026 年 10 月 CPython 3.15 正式发布，自由线程版本 3.15t 也进入“受支持”阶段。随后各个项目的 issue 区开始出现同一类帖子：“支持 Python 3.15”，下面是一张手工整理的依赖清单——谁有 wheel、谁还没有。</p>
+<h2>升级卡在哪</h2>
+<p>看看 <a href="https://github.com/tconbeer/harlequin/issues/1119">harlequin#1119</a> 和 <a href="https://github.com/jaehyeon-kim/dynamic-des/issues/40">dynamic-des#40</a>：维护者逐个打开 PyPI 页面，翻文件列表找 <code>cp315</code>；再为 3.15t 查一遍（<code>abi3</code> wheel 在自由线程版上不能用）；再为 macOS、Windows 各查一遍；下周再来一遍。</p>
+<p>pip 帮不上太多：遇到第一个需要编译的包就停下，需要在每个系统上装好目标解释器，也不会告诉你哪个新版本已经有 wheel。Dependabot / Renovate 会升版本，但不懂 wheel 标签。</p>
+<h2>wheelripe 做什么</h2>
+<p>读取 lockfile（uv、PEP 751、Poetry、Pipenv、requirements、pyproject），每个包向 PyPI JSON API 发一次请求，按 pip 的规则逐平台匹配解释器、ABI（含 PEP 803 的 <code>abi3t</code>）和平台标签（含 glibc / macOS 下限）。</p>
+<div class="rind"><pre><code>$ uvx --from git+https://github.com/Blackman99/wheelripe wheelripe uv.lock -p 3.15t</code></pre></div>
+<p>关键是区分 <b>BUMP</b>（升到某个版本就有 wheel，今天就能改）和 <b>BLOCKED</b>（任何版本都还没有，只能等上游；报告里附上游链接）。</p>
+<h2>结果可信吗</h2>
+<p>CI 每次提交都会让 pip 本身（<code>--dry-run --only-binary=:all:</code>，显式指定 Python/ABI/平台）对 26 个真实包、7 个平台、3.15 与 3.15t 逐一给出答案，与 wheelripe 不一致就失败；还会在真实的 3.15 / 3.15t 解释器上安装验证。</p>
+<h2>让 CI 每周告诉你</h2>
+<div class="rind"><pre><code>- uses: Blackman99/wheelripe@v0.1.0
+  with:
+    python-version: &quot;3.15t&quot;
+    fail-on: blocked</code></pre></div>
+<p>最后一个阻塞依赖发布 wheel 的那一周，任务会变绿。另有 MCP server，编码 agent 改 <code>requires-python</code> 前可以先问一下。</p>
+<p><a href="../docs/">文档</a> · <a href="https://github.com/Blackman99/wheelripe">GitHub</a></p>
+</main><footer class="foot"><p>wheelripe · MIT · <a href="https://github.com/Blackman99/wheelripe">GitHub</a> · <a href="https://github.com/Blackman99/wheelripe/issues">Issues</a></p></footer>
+</body>
+</html>

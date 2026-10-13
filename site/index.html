@@ -1,1 +1,165 @@
-<!doctype html><title>wheelripe</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>wheelripe — which dependencies block your move to Python 3.15?</title>
+<meta name="description" content="Before you move to a new Python (3.15, free-threaded 3.15t), find every dependency with no wheel for it on your platforms — and the version bump that fixes each one. CLI, GitHub Action, MCP server.">
+<link rel="canonical" href="https://blackman99.github.io/wheelripe/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="logo-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="logo-512.png">
+<meta name="theme-color" content="#e8742a">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="wheelripe">
+<meta property="og:title" content="wheelripe — the newer the Python, the more holes in the cheese">
+<meta property="og:description" content="Find every dependency with no wheel yet for Python 3.15 / 3.15t on your platforms, and the bump that fixes each one.">
+<meta property="og:url" content="https://blackman99.github.io/wheelripe/">
+<meta property="og:image" content="https://blackman99.github.io/wheelripe/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="An orange field with a cheese wedge whose holes are labelled with Python packages that have no cp315 wheel yet.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="wheelripe — which dependencies block your move to Python 3.15?">
+<meta name="twitter:description" content="Find every dependency with no wheel yet for Python 3.15 / 3.15t on your platforms, and the bump that fixes each one.">
+<meta name="twitter:image" content="https://blackman99.github.io/wheelripe/og.png">
+<meta name="twitter:image:alt" content="A cheese wedge whose holes are Python packages with no cp315 wheel yet.">
+<link rel="preload" href="fonts/bagel-fat-one-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#how">Skip to how it works</a>
+<header class="hero" id="top">
+  <nav class="topnav" aria-label="Site">
+    <a class="brand" href="./"><img src="favicon.svg" width="34" height="34" alt=""> wheelripe</a>
+    <a href="docs/">Docs</a>
+    <a href="https://github.com/Blackman99/wheelripe">GitHub</a>
+  </nav>
+
+  <div class="dial" role="group" aria-label="Target">
+    <p class="dial-label" id="dial-py">Ask for</p>
+    <div class="seg" role="radiogroup" aria-labelledby="dial-py" data-key="py">
+      <button role="radio" aria-checked="false" data-v="3.13">3.13</button>
+      <button role="radio" aria-checked="false" data-v="3.14">3.14</button>
+      <button role="radio" aria-checked="true" data-v="3.15">3.15</button>
+      <button role="radio" aria-checked="false" data-v="3.15t">3.15t</button>
+    </div>
+    <p class="dial-label" id="dial-os">on</p>
+    <div class="seg" role="radiogroup" aria-labelledby="dial-os" data-key="os">
+      <button role="radio" aria-checked="true" data-v="linux-x86_64">Linux</button>
+      <button role="radio" aria-checked="false" data-v="macos-arm64">macOS</button>
+      <button role="radio" aria-checked="false" data-v="windows-amd64">Windows</button>
+    </div>
+    <p class="dial-note">The cheese is a real mid-2025 lockfile of 16 packages, checked against PyPI. Hover or tap a hole.</p>
+  </div>
+
+  <svg class="cheese" id="cheese" aria-hidden="true" focusable="false"></svg>
+  <div class="eyes-layer" id="eyes" role="list" aria-label="Dependencies of the demo project"></div>
+
+  <div class="face-copy">
+    <h1>Which of your dependencies have no wheel for <span class="h1-py" id="h1py">Python&nbsp;3.15</span> yet?</h1>
+    <p class="lede">wheelripe reads your lockfile and tells you, for every platform you ship, which packages would fall back to a source build — and the first release that fixes each one.</p>
+    <p class="verdict" id="verdict" aria-live="polite">&nbsp;</p>
+  </div>
+  <aside class="slip" id="slip" hidden></aside>
+</header>
+
+<main>
+<section class="slice s-orange" id="how" aria-labelledby="how-h">
+  <div class="slant-inner">
+    <h2 id="how-h">A wheel either fits your Python or leaves a hole.</h2>
+    <p class="prose">Every wheel filename carries three tags. wheelripe checks all three against the Python and platform you are moving to, the same way pip does, for every file of every release on the index — without installing anything.</p>
+    <div class="slicer" id="slicer">
+      <div class="slicer-file" id="slicer-file" aria-live="polite"></div>
+      <div class="slices" id="slices"></div>
+      <p class="slicer-out" id="slicer-out"></p>
+      <div class="slicer-pick" role="group" aria-label="Example wheel">
+        <button data-i="0" aria-pressed="true">free-threaded only</button>
+        <button data-i="1" aria-pressed="false">old abi3</button>
+        <button data-i="2" aria-pressed="false">new glibc</button>
+        <button data-i="3" aria-pressed="false">both stable ABIs</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slice s-paste" id="use" aria-labelledby="use-h">
+  <div class="slant-inner">
+    <h2 id="use-h">Ask before you bump.</h2>
+    <div class="rind">
+<pre><code><span class="c"># one-off, no install</span>
+uvx --from git+https://github.com/Blackman99/wheelripe wheelripe
+
+<span class="c"># reads uv.lock, pylock.toml, poetry.lock, Pipfile.lock,</span>
+<span class="c"># requirements*.txt or pyproject.toml — whichever it finds</span>
+wheelripe --python 3.15
+wheelripe uv.lock --python 3.15t --platform linux-aarch64,macos-arm64</code></pre>
+    </div>
+    <ol class="steps">
+      <li><b>Reads the pins.</b> Exact versions from your lockfile, or the newest release your specifier allows.</li>
+      <li><b>Reads the files.</b> One index request per package: every wheel of every release, its tags and <code>requires-python</code>.</li>
+      <li><b>Says what to do.</b> Ready, bump to the first release that has the wheel, or blocked upstream with a link to the repo.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="slice s-orange" id="eyes-legend" aria-labelledby="leg-h">
+  <div class="slant-inner">
+    <h2 id="leg-h">Reading the holes</h2>
+    <ul class="legend">
+      <li><svg viewBox="-40 -40 80 80" aria-hidden="true"><ellipse rx="7" ry="5.5" class="pore"/></svg><b>READY</b> <span>a wheel installs (version-specific, abi3/abi3t or pure Python)</span></li>
+      <li><svg viewBox="-40 -40 80 80" aria-hidden="true"><ellipse rx="15" ry="12" class="hole"/><path d="M14 -14 l14 -14 m-10 0 h10 v10" class="arr"/></svg><b>BUMP</b> <span>your pin has no wheel; a newer release does — wheelripe names it</span></li>
+      <li><svg viewBox="-40 -40 80 80" aria-hidden="true"><ellipse rx="30" ry="24" class="hole"/><path d="M-26 6 A30 24 0 0 0 26 6 A30 15 0 0 1 -26 6Z" class="lip"/></svg><b>BLOCKED</b> <span>no release has a wheel yet: you wait on upstream (or build it yourself)</span></li>
+      <li><svg viewBox="-40 -40 80 80" aria-hidden="true"><ellipse rx="22" ry="17" class="hole crack"/></svg><b>EXCLUDED</b> <span><code>requires-python</code> rules your Python out</span></li>
+      <li><svg viewBox="-40 -40 80 80" aria-hidden="true"><ellipse rx="11" ry="9" class="hole soft"/></svg><b>BUILD</b> <span>sdist only for every Python — fine if it is pure Python</span></li>
+    </ul>
+    <p class="prose">Exit code 1 when anything needs a bump or is blocked (<code>--fail-on blocked</code> to only fail on upstream blockers). Glibc and macOS floors are yours to set: <code>--glibc 2.28</code>, <code>--macos 13</code>. If a package only ships wheels for a newer glibc than your floor, wheelripe says so.</p>
+  </div>
+</section>
+
+<section class="slice s-paste" id="ci" aria-labelledby="ci-h">
+  <div class="slant-inner">
+    <h2 id="ci-h">In CI, and for your coding agent</h2>
+    <div class="pair">
+      <div class="rind">
+<pre><code><span class="c"># .github/workflows/py315.yml — weekly: are we ripe yet?</span>
+on: {schedule: [{cron: "0 6 * * 1"}], workflow_dispatch: {}}
+jobs:
+  ripe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: Blackman99/wheelripe@v0.1.0
+        with: {python-version: "3.15", fail-on: blocked}</code></pre>
+      </div>
+      <div class="rind">
+<pre><code><span class="c"># MCP (Claude Code, Cursor, Codex …) — read-only</span>
+{"mcpServers": {"wheelripe": {
+  "command": "uvx",
+  "args": ["--from", "git+https://github.com/Blackman99/wheelripe",
+           "wheelripe", "mcp"]}}}
+<span class="c"># tools: check_python_upgrade, explain_wheel</span></code></pre>
+      </div>
+    </div>
+    <p class="prose">The Action writes a table to the job summary, annotates each blocker and exposes <code>ripe</code>, <code>blocked</code> and <code>bump</code> outputs — so a scheduled job can tell you the week your last blocker clears.</p>
+  </div>
+</section>
+
+<section class="slice s-orange" id="trust" aria-labelledby="trust-h">
+  <div class="slant-inner">
+    <h2 id="trust-h">It agrees with pip, or CI goes red.</h2>
+    <p class="prose">On every push, CI asks pip itself — <code>--only-binary=:all:</code> with an explicit Python, ABI and platform — about 26 real packages on 7 platforms against the live PyPI, for both 3.15 and 3.15t, and fails on any disagreement (182/182 today). Then it installs on real CPython 3.15 and 3.15t interpreters and checks the predictions again.</p>
+    <p class="prose small">The cheese at the top is real too: those are wheelripe's verdicts for a mid-2025 lockfile, fetched from PyPI on <span id="gen">build day</span>.</p>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <img src="favicon.svg" width="28" height="28" alt="">
+  <p>wheelripe · MIT · <a href="https://github.com/Blackman99/wheelripe">GitHub</a> · <a href="docs/">Docs</a> · <a href="docs/faq.html">FAQ</a> · <a href="blog/">Notes</a></p>
+  <p class="small">Python wheels are named after cheese wheels; PyPI used to be called the Cheese Shop.</p>
+</footer>
+<script src="app.js" defer></script>
+</body>
+</html>

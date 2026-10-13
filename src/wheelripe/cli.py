@@ -11,7 +11,7 @@ from . import __version__, report
 from .check import FAILING, run
 from .inputs import InputError, collect
 from .pypi import PyPI
-from .tags import DEFAULT_PLATFORMS, PLATFORM_KEYS, Python, compatible, make_platform, parse_wheel_filename
+from .tags import DEFAULT_PLATFORMS, PLATFORM_KEYS, Python, explain_one, make_platform, parse_wheel_filename
 
 DEFAULT_PYTHON = "3.15"
 
@@ -87,16 +87,21 @@ def cmd_wheel(argv: List[str]) -> int:
             print(f"{f}: not a wheel filename", file=sys.stderr)
             ok_all = False
             continue
-        res = {p.key: compatible(tags, target, p) for p in plats}
-        ok_all &= all(res.values())
-        cells = "  ".join(f"{k}:{'yes' if v else 'no'}" for k, v in res.items())
-        print(f"{os.path.basename(f)}  CPython {target}  {cells}")
+        print(f"{os.path.basename(f)} on CPython {target}")
+        for p in plats:
+            ok, why = explain_one(tags, target, p)
+            ok_all &= ok
+            print(f"  {'yes' if ok else 'no ':3}  {p.key:<18} {why}")
     return 0 if ok_all else 1
 
 
 def main(argv: Optional[List[str]] = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     if argv and argv[0] == "mcp":
+        if any(a in ("-h", "--help") for a in argv[1:]):
+            print("usage: wheelripe mcp\n\nRun the read-only MCP server on stdio (newline-delimited JSON-RPC).\n"
+                  "Tools: check_python_upgrade, explain_wheel.")
+            return 0
         from .mcp import serve
         return serve()
     if argv and argv[0] == "wheel":

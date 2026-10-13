@@ -253,3 +253,59 @@ def binary_pythons(all_tags: Iterable[WheelTags]) -> list:
     def key(s: str):
         return (int(s[3:].rstrip("t")), s.endswith("t"))
     return sorted(seen, key=key)
+
+
+def _fmt(v: Tuple[int, int]) -> str:
+    return f"{v[0]}.{v[1]}"
+
+
+def why_not_platform(tags: WheelTags, plat: Platform) -> str:
+    """One-line reason none of the wheel's platform tags fit (assumes they don't)."""
+    floors = []
+    for tag in tags.platforms:
+        m = re.fullmatch(r"manylinux_(\d+)_(\d+)_(\w+)", tag)
+        if m and plat.os == "linux" and m.group(3) == plat.arch:
+            floors.append(f"needs glibc {m.group(1)}.{m.group(2)}, your floor is {_fmt(plat.libc)}")
+        m = re.fullmatch(r"musllinux_(\d+)_(\d+)_(\w+)", tag)
+        if m and plat.os == "musllinux" and m.group(3) == plat.arch:
+            floors.append(f"needs musl {m.group(1)}.{m.group(2)}, your floor is {_fmt(plat.libc)}")
+        m = re.fullmatch(r"macosx_(\d+)_(\d+)_(\w+)", tag)
+        if m and plat.os == "macos" and m.group(3) in _MAC_ARCHES[plat.arch] and int(m.group(1)) >= 11:
+            floors.append(f"needs macOS {m.group(1)}, your floor is {plat.libc[0]}")
+    if floors:
+        return floors[0]
+    return f"built for {', '.join(sorted(tags.platforms))}, not {plat.key}"
+
+
+def why_not_python(tags: WheelTags, target: Python) -> str:
+    """One-line reason no interpreter/ABI pair fits (assumes none does)."""
+    abis = tags.abis
+    if target.freethreaded:
+        if "abi3" in abis and "abi3t" not in abis:
+            return "abi3 (stable ABI) wheels never load on free-threaded builds; needs abi3t or cp%st" % target.nodot
+        if f"cp{target.nodot}" in abis:
+            return f"built for the GIL build cp{target.nodot}, not free-threaded cp{target.nodot}t"
+    else:
+        if f"cp{target.nodot}t" in abis or "abi3t" in abis and "abi3" not in abis:
+            return f"built for free-threaded builds only, not GIL-enabled CPython {target}"
+    cps = sorted({m for m in (_cp_minor(p, target.major) for p in tags.pythons) if m is not None})
+    if "abi3" in abis or "abi3t" in abis:
+        if cps and min(cps) > target.minor:
+            return f"stable-ABI wheel needs CPython {target.major}.{min(cps)} or newer"
+    if cps:
+        return f"built for {', '.join(sorted(tags.pythons))}, not cp{target.nodot}{'t' if target.freethreaded else ''}"
+    return f"interpreter tag {', '.join(sorted(tags.pythons))} does not match CPython {target}"
+
+
+def explain_one(tags: WheelTags, target: Python, plat: Platform) -> Tuple[bool, str]:
+    """(installs?, short reason) for one wheel on one target."""
+    py_ok = any(_interp_abi_ok(py, abi, target) for py in tags.pythons for abi in tags.abis)
+    plat_ok = any(platform_ok(p, plat) for p in tags.platforms)
+    if py_ok and plat_ok:
+        return True, f"installs ({kind(tags, target)})"
+    reasons = []
+    if not py_ok:
+        reasons.append(why_not_python(tags, target))
+    if not plat_ok:
+        reasons.append(why_not_platform(tags, plat))
+    return False, "; ".join(reasons)

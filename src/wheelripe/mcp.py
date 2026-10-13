@@ -15,7 +15,7 @@ from . import __version__, report
 from .check import run
 from .inputs import InputError, collect, from_spec
 from .pypi import PyPI
-from .tags import DEFAULT_PLATFORMS, PLATFORM_KEYS, Python, compatible, make_platform, parse_wheel_filename
+from .tags import DEFAULT_PLATFORMS, PLATFORM_KEYS, Python, explain_one, make_platform, parse_wheel_filename
 
 SUPPORTED = ("2025-06-18", "2025-03-26", "2024-11-05")
 
@@ -80,10 +80,14 @@ def call_tool(name: str, args: Dict[str, Any], fetch=None) -> Dict[str, Any]:
         tags = parse_wheel_filename(args["filename"])
         if not tags:
             raise ValueError("not a wheel filename")
-        res = {p.key: compatible(tags, target, p) for p in _plats(args)}
-        txt = "\n".join(f"{k}: {'installs' if v else 'does NOT install'} on CPython {target}" for k, v in res.items())
+        res, why = {}, {}
+        for p in _plats(args):
+            res[p.key], why[p.key] = explain_one(tags, target, p)
+        txt = "\n".join(f"{k}: {'installs' if v else 'does NOT install'} on CPython {target} — {why[k]}"
+                        for k, v in res.items())
         return {"content": [{"type": "text", "text": txt}],
-                "structuredContent": {"filename": args["filename"], "python": str(target), "installs": res}}
+                "structuredContent": {"filename": args["filename"], "python": str(target),
+                                      "installs": res, "reasons": why}}
     if name == "check_python_upgrade":
         if args.get("requirements"):
             deps = [from_spec(s, "mcp") for s in args["requirements"]]

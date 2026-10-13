@@ -103,3 +103,16 @@ def test_unknown_platform():
 def test_not_a_wheel():
     assert parse_wheel_filename("x-1.0.tar.gz") is None
     assert parse_wheel_filename("bad.whl") is None
+
+
+def test_explain_one_reasons():
+    from wheelripe.tags import explain_one
+    lin = make_platform("linux-x86_64")
+    ok, why = explain_one(parse_wheel_filename("orjson-3.13.0-cp315-cp315-manylinux_2_39_x86_64.whl"), Python.parse("3.15"), lin)
+    assert not ok and "glibc 2.39" in why and "2.34" in why
+    ok, why = explain_one(parse_wheel_filename("c-1-cp311-abi3-manylinux_2_17_x86_64.whl"), Python.parse("3.15t"), lin)
+    assert not ok and "abi3t" in why
+    ok, why = explain_one(parse_wheel_filename("c-1-cp311-abi3-manylinux_2_17_x86_64.whl"), Python.parse("3.15"), lin)
+    assert ok and "abi3" in why
+    ok, why = explain_one(parse_wheel_filename("m-1-cp315-cp315t-manylinux_2_17_x86_64.whl"), Python.parse("3.15"), lin)
+    assert not ok and "free-threaded" in why
