@@ -1,0 +1,88 @@
+name: CI
+on:
+  push: {branches: [main]}
+  pull_request:
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  test:
+    name: unit (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.11", "3.13", "3.14", "3.15", "3.15t"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: {python-version: "${{ matrix.python }}"}
+      - run: python -m pip install -e ".[test]"
+      - run: python -m pytest -q
+      - run: wheelripe --version && wheelripe wheel x-1-cp315-abi3.abi3t-manylinux_2_28_x86_64.whl --python 3.15t --platform linux-x86_64
+
+  pip-ground-truth:
+    name: agrees with pip on real PyPI (${{ matrix.target }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ["3.15", "3.15t"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: {python-version: "3.13"}
+      - run: python -m pip install -U pip && python -m pip install -e .
+      - run: python scripts/crosscheck_pip.py ${{ matrix.target }}
+
+  real-interpreter:
+    name: real install on CPython ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.15", "3.15t"]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: {python-version: "${{ matrix.python }}"}
+      - run: python -m pip install .
+      - run: python scripts/real_install.py "${{ matrix.python }}"
+
+  action:
+    name: action on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v5
+      - name: ripe project passes
+        id: ripe
+        uses: ./
+        with:
+          path: examples/requirements-ripe.txt
+      - name: blocked project fails
+        id: blocked
+        continue-on-error: true
+        uses: ./
+        with:
+          path: examples/requirements-blocked.txt
+      - name: assert outputs
+        shell: bash
+        run: |
+          echo "ripe=${{ steps.ripe.outputs.ripe }} blocked-outcome=${{ steps.blocked.outcome }} bump=${{ steps.blocked.outputs.bump }} blocked=${{ steps.blocked.outputs.blocked }}"
+          test "${{ steps.ripe.outputs.ripe }}" = "true"
+          test "${{ steps.blocked.outcome }}" = "failure"
+          test "${{ steps.blocked.outputs.ripe }}" = "false"
+          test "${{ steps.blocked.outputs.bump }}" -ge 2
+
+  mcp:
+    name: MCP stdio smoke (real PyPI)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: {python-version: "3.13"}
+      - run: python -m pip install .
+      - run: python scripts/mcp_smoke.py

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="t">
+  <title id="t">wheelripe — a cheese wedge with open eyes</title>
+  <defs>
+    <mask id="bite">
+      <rect width="512" height="512" fill="#fff"/>
+      <circle cx="292" cy="262" r="40" fill="#000"/>
+    </mask>
+  </defs>
+  <g mask="url(#bite)">
+    <path d="M70 132 C70 128 74 126 78 128 L452 384 C458 388 456 400 448 400 L80 400 C74 400 70 396 70 390 Z" fill="#ffd978"/>
+    <path d="M70 132 C70 128 74 126 78 128 L118 155 L118 400 L80 400 C74 400 70 396 70 390 Z" fill="#a8471a"/>
+  </g>
+  <ellipse cx="214" cy="326" rx="42" ry="33" fill="#6e2c0e"/>
+  <path d="M176 334 A42 33 0 0 0 252 334 A42 22 0 0 1 176 334 Z" fill="#a8471a"/>
+  <ellipse cx="170" cy="232" rx="15" ry="12" fill="#6e2c0e"/>
+  <ellipse cx="344" cy="364" rx="12" ry="9" fill="#6e2c0e"/>
+</svg>

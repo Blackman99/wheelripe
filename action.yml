@@ -1,0 +1,77 @@
+name: 'wheelripe — Python upgrade wheel check'
+description: 'Find dependencies with no wheel yet for the Python you are moving to (3.15, 3.15t) and the bump that fixes each.'
+author: 'Blackman99'
+branding:
+  icon: 'pie-chart'
+  color: 'orange'
+inputs:
+  path:
+    description: 'Lockfile, requirements file, pyproject.toml or directory (auto-detect). Space-separated for several.'
+    default: '.'
+  python-version:
+    description: 'Target CPython, e.g. 3.15 or 3.15t (free-threaded).'
+    default: '3.15'
+  platforms:
+    description: 'Comma-separated targets: linux-x86_64, linux-aarch64, musllinux-x86_64, musllinux-aarch64, macos-arm64, macos-x86_64, windows-amd64, windows-arm64, windows-x86.'
+    default: 'linux-x86_64,macos-arm64,windows-amd64'
+  fail-on:
+    description: 'Fail the step when anything is at least this bad: bump, blocked, build or never.'
+    default: 'bump'
+  glibc:
+    description: 'Oldest glibc you deploy on (linux-*). Default 2.34.'
+    default: ''
+  macos:
+    description: 'Oldest macOS you support (macos-*). Default 14.'
+    default: ''
+outputs:
+  ripe:
+    description: '"true" when every dependency installs from a wheel on the target.'
+    value: ${{ steps.check.outputs.ripe }}
+  blocked:
+    description: 'Number of dependencies blocked upstream (no release has a wheel yet).'
+    value: ${{ steps.check.outputs.blocked }}
+  bump:
+    description: 'Number of dependencies fixed by a version bump.'
+    value: ${{ steps.check.outputs.bump }}
+  report:
+    description: 'Path to the JSON report.'
+    value: ${{ steps.check.outputs.report }}
+runs:
+  using: 'composite'
+  steps:
+    - id: check
+      shell: bash
+      env:
+        WR_PATH: ${{ inputs.path }}
+        WR_PY: ${{ inputs.python-version }}
+        WR_PLATFORMS: ${{ inputs.platforms }}
+        WR_FAIL: ${{ inputs.fail-on }}
+        WR_GLIBC: ${{ inputs.glibc }}
+        WR_MACOS: ${{ inputs.macos }}
+      run: |
+        set -u
+        PY=$(command -v python3 || command -v python)
+        venv="$RUNNER_TEMP/wheelripe-venv"
+        "$PY" -m venv "$venv"
+        if [ -x "$venv/bin/python" ]; then bin="$venv/bin"; else bin="$venv/Scripts"; fi
+        "$bin/python" -m pip install -q --disable-pip-version-check "$GITHUB_ACTION_PATH"
+        report="$RUNNER_TEMP/wheelripe.json"
+        args=(--python "$WR_PY" --platform "$WR_PLATFORMS" --fail-on "$WR_FAIL" --annotations
+              --json-out "$report" --summary "$GITHUB_STEP_SUMMARY")
+        [ -n "$WR_GLIBC" ] && args+=(--glibc "$WR_GLIBC")
+        [ -n "$WR_MACOS" ] && args+=(--macos "$WR_MACOS")
+        rc=0
+        # shellcheck disable=SC2086
+        "$bin/wheelripe" $WR_PATH "${args[@]}" || rc=$?
+        if [ -f "$report" ]; then
+          "$bin/python" - "$report" >> "$GITHUB_OUTPUT" <<'PYEOF'
+        import json, sys
+        d = json.load(open(sys.argv[1]))
+        s = d["summary"]
+        print(f"ripe={'true' if d['ripe'] else 'false'}")
+        print(f"blocked={s['blocked'] + s['excluded']}")
+        print(f"bump={s['bump']}")
+        PYEOF
+          echo "report=$report" >> "$GITHUB_OUTPUT"
+        fi
+        exit $rc

@@ -1,0 +1,20 @@
+name: Release
+on:
+  push: {tags: ['v*']}
+permissions: {contents: write}
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: {python-version: "3.13"}
+      - run: python -m pip install build pytest && python -m pip install -e .
+      - run: python -m pytest -q
+      - run: python -m build
+      - name: version matches tag
+        run: test "v$(python -c 'import wheelripe; print(wheelripe.__version__)')" = "${GITHUB_REF_NAME}"
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
