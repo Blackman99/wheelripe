@@ -47,7 +47,7 @@ def explain(r: Result, platforms: List[str], python: str = "") -> str:
         return r.note
     if r.status == READY:
         kinds = sorted({p.kind for p in r.platforms.values() if p.kind})
-        return "wheel: " + ", ".join(kinds) if kinds else "wheel available"
+        return ("wheel: " + ", ".join(kinds) if kinds else "wheel available") + _yanked(r)
     if r.status == SKIP:
         return "marker excludes every target"
     where = "any target platform" if len(bad) == len(platforms) else ", ".join(bad)
@@ -78,7 +78,11 @@ def explain(r: Result, platforms: List[str], python: str = "") -> str:
             msg += f" · {' / '.join(fixes)} fixes {', '.join(soft)}"
     if good and bad and len(good) < len(platforms):
         msg += f" · ready on {', '.join(good)}"
-    return msg
+    return msg + _yanked(r)
+
+
+def _yanked(r: Result) -> str:
+    return f" · {r.version} is yanked (pip installs it only because it is pinned, with a warning)" if r.yanked else ""
 
 
 def text(rep: Report, stream=None, show_ready: bool = False) -> str:

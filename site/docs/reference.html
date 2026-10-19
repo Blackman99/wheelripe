@@ -74,6 +74,7 @@ wheelripe mcp</code></pre></div>
 <tr><td><code>missing</code></td><td>The package or version is not on the index.</td></tr>
 </tbody></table>
 <p>A package's overall status is its worst status across the platforms you asked for.</p>
+<p>Yanked files (PEP 592) are skipped, as pip skips them — except when an exact pin selects a yanked release: pip installs it then, with a warning, so wheelripe judges that release and marks the package <code>"yanked": true</code>.</p>
 <h2 id="platforms">Platform keys</h2>
 <table><thead><tr><th>Key</th><th>Wheel tags accepted</th></tr></thead><tbody>
 <tr><td><code>linux-x86_64</code>, <code>linux-aarch64</code></td><td><code>manylinux_X_Y_ARCH</code> with X.Y ≤ glibc floor, legacy <code>manylinux1/2010/2014</code>, <code>linux_ARCH</code></td></tr>

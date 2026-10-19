@@ -54,6 +54,7 @@ class Result:
     upstream: Optional[str] = None
     origin: str = ""
     note: str = ""
+    yanked: Optional[bool] = None  # True when an exact pin selects a yanked release
 
     def to_dict(self) -> dict:
         d = asdict(self)
@@ -163,9 +164,10 @@ class _Releases:
     def has(self, v: Version) -> bool:
         return v in self.exact if v.local else Version(v.public) in self.public
 
-    def files(self, v: Version) -> list:
-        """Non-yanked files pip could pick for ``==v``."""
-        return _files(self.exact.get(v, []) if v.local else self.public.get(Version(v.public), []))
+    def files(self, v: Version, yanked: bool = False) -> list:
+        """Files pip could pick for ``==v``; yanked ones only when asked for."""
+        files = self.exact.get(v, []) if v.local else self.public.get(Version(v.public), [])
+        return list(files) if yanked else _files(files)
 
     def versions(self, pre: bool) -> List[Version]:
         """Public versions with at least one non-yanked file, oldest first."""
@@ -217,12 +219,16 @@ def classify(dep: Dep, project: Optional[dict], target: Python, plats: Sequence[
         version = str(sel)
 
     files = rel.files(sel)
+    yanked = None
+    if pinned and not files and rel.files(sel, yanked=True):
+        # PEP 592: pip skips yanked files unless an exact pin leaves nothing else (it then warns)
+        files, yanked = rel.files(sel, yanked=True), True
     rp = _requires_python(files)
     all_tags = [t for t in (parse_wheel_filename(f["filename"]) for f in files) if t]
     ships = binary_pythons(all_tags)
     has_wheels = bool(all_tags)
     res = Result(name, version, pinned, READY, latest=latest, ships=ships, requires_python=rp,
-                 upstream=_upstream(info), origin=dep.origin)
+                 upstream=_upstream(info), origin=dep.origin, yanked=yanked)
 
     marker = None
     if dep.marker:

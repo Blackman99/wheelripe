@@ -55,6 +55,9 @@ FAKE = {
     "dualabi": project("dualabi", {"1.0": [wheel("dualabi", "1.0", "cp315", "abi3.abi3t", p) for p in ALL_PLATS]}),
     # cp315 only for a new glibc
     "newglibc": project("newglibc", {"1.0": binary("newglibc", "1.0", ["315"], plats=["manylinux_2_39_x86_64", "win_amd64"])}),
+    # 1.0 is yanked (an exact pin still installs it, as in pip); 1.1 is the newest usable release
+    "yankpin": project("yankpin", {"1.0": [dict(f, yanked=True) for f in binary("yankpin", "1.0", ["315"])],
+                                   "1.1": binary("yankpin", "1.1", ["314"])}),
     # windows-only package
     "winonly": project("winonly", {"300": binary("winonly", "300", ["314", "315"], plats=["win_amd64"])}),
 }

@@ -31,6 +31,7 @@ SPECS = [
     "torch==2.14.1",
     "six==1.16.0",         # not on the PyTorch index (403) -> comes from the extra index
     "markupsafe==3.0.3",   # on both indexes -> pooled
+    "requests==2.32.0",    # yanked on PyPI: pip still installs an exact pin (PEP 592)
 ]
 PLATFORMS = {k: ALL_PLATFORMS[k] for k in ("linux-x86_64", "linux-aarch64", "macos-arm64", "macos-x86_64",
                                            "windows-amd64")}
