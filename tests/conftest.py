@@ -64,6 +64,18 @@ def fake_fetch(name):
     return FAKE.get(name)
 
 
+INDEX_ENV = ("PIP_INDEX_URL", "PIP_EXTRA_INDEX_URL", "UV_DEFAULT_INDEX", "UV_INDEX_URL", "UV_INDEX",
+             "UV_EXTRA_INDEX_URL", "WHEELRIPE_INDEX", "NETRC")
+
+
+@pytest.fixture(autouse=True)
+def _no_index_env(monkeypatch, tmp_path):
+    """Tests never inherit the developer's index configuration or ~/.netrc."""
+    for var in INDEX_ENV:
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setenv("NETRC", str(tmp_path / "no-netrc"))
+
+
 @pytest.fixture
 def fetch():
     return fake_fetch
