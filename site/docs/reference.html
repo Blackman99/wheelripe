@@ -50,6 +50,7 @@ wheelripe mcp</code></pre></div>
 <tr><td><code>-i, --index-url URL</code></td><td>PyPI</td><td>Simple-API index (PEP 691/503) to use instead of PyPI. Credentials in the URL are never printed.</td></tr>
 <tr><td><code>--extra-index-url URL</code></td><td></td><td>One more simple-API index; repeatable; files are pooled.</td></tr>
 <tr><td><code>--index URL</code></td><td>https://pypi.org/pypi</td><td>PyPI JSON API base, for a mirror of it.</td></tr>
+<tr><td><code>--no-tracking</code></td><td></td><td>Skip the GitHub search for blocked packages' upstream issue or PR.</td></tr>
 <tr><td><code>--workers N</code></td><td>8</td><td>Parallel index requests.</td></tr>
 <tr><td><code>-o, --output FILE</code></td><td>stdout</td><td>Write the report to a file.</td></tr>
 <tr><td><code>--summary FILE</code></td><td></td><td>Append a Markdown summary (e.g. <code>$GITHUB_STEP_SUMMARY</code>).</td></tr>
@@ -110,10 +111,21 @@ wheelripe mcp</code></pre></div>
       &quot;requires_python&quot;: &quot;&gt;=3.9&quot;,
       &quot;upstream&quot;: &quot;https://github.com/numpy/numpy&quot;,
       &quot;origin&quot;: &quot;uv.lock&quot;
+    },
+    {
+      &quot;name&quot;: &quot;confluent-kafka&quot;, &quot;version&quot;: &quot;2.16.0&quot;, &quot;status&quot;: &quot;blocked&quot;,
+      &quot;upstream&quot;: &quot;https://github.com/confluentinc/confluent-kafka-python&quot;,
+      &quot;tracking&quot;: {
+        &quot;url&quot;: &quot;https://github.com/confluentinc/confluent-kafka-python/issues/2299&quot;,
+        &quot;number&quot;: 2299, &quot;kind&quot;: &quot;issue&quot;, &quot;state&quot;: &quot;open&quot;,
+        &quot;title&quot;: &quot;Python 3.15 support including binary wheels&quot;, &quot;others&quot;: 2,
+        &quot;search&quot;: &quot;https://github.com/confluentinc/confluent-kafka-python/issues?q=3.15%20in%3Atitle&quot;
+      }
     }
   ]
 }</code></pre></div>
-<p>Packages are sorted worst first. Fields that do not apply are omitted. Two top-level fields appear only when they have something to say: <code>indexes</code> (the indexes consulted, redacted, when anything besides PyPI was used, e.g. <code>["download.pytorch.org/whl/cpu", "pypi.org"]</code>) and <code>warnings</code> (index problems such as a 401, also printed to stderr).</p>
+<p>Packages are sorted worst first. Fields that do not apply are omitted. Two top-level fields appear only when they have something to say: <code>indexes</code> (the indexes consulted, redacted, when anything besides PyPI was used, e.g. <code>["download.pytorch.org/whl/cpu", "pypi.org"]</code>) and <code>warnings</code> (index problems such as a 401, or an upstream lookup that could not run; also printed to stderr).</p>
+<p><code>tracking</code> appears on blocked and excluded packages when a search ran: <code>state</code> is <code>open</code>, <code>merged</code> or <code>closed</code>, <code>kind</code> is <code>issue</code> or <code>pr</code>, <code>others</code> counts further open matches. When nothing matched it holds only <code>search</code>, a link to run the search yourself. No <code>tracking</code> key means no search ran.</p>
 <p class="next"><a href="faq.html">FAQ →</a></p>
 </main></div><footer class="foot"><p>wheelripe · MIT · <a href="https://github.com/Blackman99/wheelripe">GitHub</a> · <a href="https://github.com/Blackman99/wheelripe/issues">Issues</a></p></footer>
 </body>

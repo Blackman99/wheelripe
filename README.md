@@ -29,12 +29,16 @@ wheelripe requirements.txt --platform linux-aarch64,musllinux-x86_64 --glibc 2.2
 
 ```
 BLOCKED  confluent-kafka 2.16.0          no cp315 wheel for any target platform (ships cp38–cp314)
+         tracking: open issue #2299 · Python 3.15 support including binary wheels
+                   https://github.com/confluentinc/confluent-kafka-python/issues/2299 · +2 more open
 BUMP     numpy 1.26.4 → 2.5.2            no cp315 wheel in 1.26.4 (ships cp39–cp312); 2.5.2 is the first release with one
 BUMP     pydantic_core 2.41.5 → 2.48.0   no cp315 wheel in 2.41.5 (ships cp39–cp314); 2.48.0 is the first release with one
 READY    1 package (0 with binary wheels · 1 pure Python)
 
 NOT RIPE for CPython 3.15: 1 blocked upstream · 2 need a version bump
 ```
+
+A BUMP you can do today. A BLOCKED package you wait for, so wheelripe finds its GitHub repository from PyPI and links the open issue or PR asking for the new Python's wheels (in every output format), or tells you nobody has asked yet. One search per blocked package, no token needed (`GITHUB_TOKEN` raises GitHub's limit from 10 to 30 searches a minute); offline or rate-limited, it says so once and the verdicts and exit code stay the same. `--no-tracking` turns it off.
 
 ### PyTorch, private mirrors and other indexes
 

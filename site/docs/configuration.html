@@ -74,6 +74,13 @@
 <tr><td>5xx, timeouts</td><td>Three attempts, then exit code 2.</td></tr>
 </tbody></table>
 <p>Warnings go to stderr, into the JSON report (<code>warnings</code>), the Markdown summary and, with <code>--annotations</code>, a <code>::warning</code> annotation.</p>
+<h2 id="tracking">Upstream tracking</h2>
+<p>For each <code>blocked</code> or <code>excluded</code> package, wheelripe takes the GitHub repository from the package's PyPI links and runs one search for issues and PRs whose title mentions the target (<code>3.15</code> or <code>cp315</code>; for <code>3.15t</code> also free-threading). Open beats closed; then titles that ask directly for the target's wheels beat passing mentions. Test failures, crash reports and dependency bumps are ignored. A merged PR or closed issue is shown only when the package has no wheel on any platform, as “fixed upstream, waiting for a release”.</p>
+<ul>
+<li><b>No search</b> when the only problem is your glibc/macOS floor (a newer system would work, so there is nothing to file upstream), when the project is not on GitHub, or with <code>--no-tracking</code> / <code>WHEELRIPE_NO_TRACKING=1</code>.</li>
+<li><b>Token optional.</b> Without one GitHub allows 10 searches a minute; with <code>GITHUB_TOKEN</code> (or <code>GH_TOKEN</code>) 30. The token goes to <code>api.github.com</code> only and is never printed. A rejected token is dropped and the search retried anonymously.</li>
+<li><b>Never fails the check.</b> Offline, rate-limited or a GitHub error: the affected packages get no link and one warning says why (<code>upstream lookup: …</code>). Verdicts and the exit code are the same as with <code>--no-tracking</code>.</li>
+</ul>
 <h2 id="env">Environment variables</h2>
 <table><thead><tr><th>Variable</th><th>Effect</th></tr></thead><tbody>
 <tr><td><code>WHEELRIPE_PYTHON</code></td><td>Default for <code>--python</code>.</td></tr>
@@ -81,6 +88,8 @@
 <tr><td><code>PIP_INDEX_URL</code>, <code>UV_DEFAULT_INDEX</code>, <code>UV_INDEX_URL</code></td><td>Main simple index when neither <code>--index-url</code> nor a requirements-file <code>-i</code> is given.</td></tr>
 <tr><td><code>PIP_EXTRA_INDEX_URL</code>, <code>UV_INDEX</code>, <code>UV_EXTRA_INDEX_URL</code></td><td>Extra simple indexes (space-separated; <code>UV_INDEX</code> entries may be <code>name=url</code>).</td></tr>
 <tr><td><code>NETRC</code></td><td>netrc file with index credentials (default <code>~/.netrc</code>).</td></tr>
+<tr><td><code>GITHUB_TOKEN</code>, <code>GH_TOKEN</code></td><td>Optional token for the <a href="#tracking">upstream tracking</a> search.</td></tr>
+<tr><td><code>WHEELRIPE_NO_TRACKING</code></td><td><code>1</code> = <code>--no-tracking</code>.</td></tr>
 <tr><td><code>NO_COLOR</code></td><td>Plain text output.</td></tr>
 <tr><td><code>HTTPS_PROXY</code></td><td>Standard proxy support.</td></tr>
 <tr><td><code>SSL_CERT_FILE</code></td><td>CA bundle for an index behind a private certificate authority.</td></tr>

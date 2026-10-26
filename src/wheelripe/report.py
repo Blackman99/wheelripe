@@ -85,6 +85,27 @@ def _yanked(r: Result) -> str:
     return f" · {r.version} is yanked (pip installs it only because it is pinned, with a warning)" if r.yanked else ""
 
 
+def _tracking_parts(r: Result, others: bool = True):
+    """("open issue", "#2299", "Python 3.15 support … (+2 more)") or None."""
+    t = r.tracking
+    if not t or not t.get("url"):
+        return None
+    state = t.get("state") or "open"
+    what = f"{state} {'PR' if t.get('kind') == 'pr' else 'issue'}"
+    rest = t.get("title", "")
+    if state in ("merged", "closed"):
+        rest += " · fixed upstream, waiting for a release"
+    if others and t.get("others"):
+        rest += f" (+{t['others']} more open)"
+    return what, f"#{t.get('number')}", rest
+
+
+def tracking_phrase(r: Result) -> str:
+    """``open issue #2299 · Python 3.15 support (+2 more)``; "" when there is nothing to say."""
+    parts = _tracking_parts(r)
+    return f"{parts[0]} {parts[1]} · {parts[2]}" if parts else ""
+
+
 def text(rep: Report, stream=None, show_ready: bool = False) -> str:
     stream = stream or sys.stdout
     color = _use_color(stream)
@@ -107,8 +128,15 @@ def text(rep: Report, stream=None, show_ready: bool = False) -> str:
             continue
         head = f"{r.name} {ver(r)}".ljust(width + 2)
         lines.append(f"{c(COLOR[r.status], LABEL[r.status].ljust(8))} {head} {explain(r, rep.platforms, rep.python)}")
-        if r.status in (BLOCKED, EXCLUDED) and r.upstream:
-            lines.append(c("90", f"{'':8} {'':{width + 2}} upstream: {r.upstream}"))
+        pad = " " * 9  # under the package name, so long explanations do not push links off-screen
+        if r.status in (BLOCKED, EXCLUDED) and r.tracking and r.tracking.get("url"):
+            what, num, title = _tracking_parts(r, others=False)
+            more = f" · +{r.tracking['others']} more open" if r.tracking.get("others") else ""
+            lines.append(pad + c("34", "tracking: ") + f"{what} {num} · {title}")
+            lines.append(pad + " " * 10 + c("90", r.tracking["url"] + more))
+        elif r.status in (BLOCKED, EXCLUDED) and r.upstream:
+            none = (f" · no open issue or PR about {rep.python} found" if r.tracking is not None else "")
+            lines.append(c("90", f"{pad}upstream: {r.upstream}{none}"))
     if ready and not show_ready:
         kinds = {}
         for r in ready:
@@ -160,11 +188,21 @@ def markdown(rep: Report) -> str:
         out += ["| status | package | locked | fix | why |", "|---|---|---|---|---|"]
         for r in rows:
             name = f"[{r.name}]({r.upstream})" if r.upstream else r.name
+            why = explain(r, rep.platforms, rep.python)
+            if r.tracking and r.tracking.get("url"):
+                what, num, rest = _tracking_parts(r)
+                why += f"<br>tracking: {what} [{num}]({r.tracking['url']}) · {rest}"
+            elif r.tracking is not None and r.status in (BLOCKED, EXCLUDED):
+                why += f"<br>no open [issue or PR about {rep.python}]({r.tracking.get('search')}) found upstream"
             out.append(f"| {LABEL[r.status]} | {name} | {r.version or ''} | {r.fix or ''} | "
-                       f"{explain(r, rep.platforms, rep.python)} |")
+                       f"{_cell(why)} |")
         out.append("")
     out.append(f"{n[READY]} ready · {n[BUILD]} sdist-only · {n[SKIP]} skipped by markers.")
     return "\n".join(out) + "\n"
+
+
+def _cell(text: str) -> str:
+    return text.replace("|", "\\|").replace("\n", " ")
 
 
 def _gh(text: str) -> str:
@@ -176,9 +214,13 @@ def github(rep: Report) -> str:
     out = []
     for r in rep.results:
         if r.status in (BLOCKED, EXCLUDED, MISSING):
-            out.append(f"::error title=wheelripe {LABEL[r.status]} {r.name}::{_gh(explain(r, rep.platforms, rep.python))}")
+            msg = explain(r, rep.platforms, rep.python)
+            if r.tracking and r.tracking.get("url"):
+                what, _, rest = _tracking_parts(r)
+                msg += f" · tracking: {what} {r.tracking['url']} · {rest}"
+            out.append(f"::error title=wheelripe {LABEL[r.status]} {r.name}::{_gh(msg)}")
         elif r.status in (BUMP, BUILD):
             out.append(f"::warning title=wheelripe {LABEL[r.status]} {r.name}::{_gh(explain(r, rep.platforms, rep.python))}")
     for w in rep.warnings:
-        out.append(f"::warning title=wheelripe index::{_gh(w)}")
+        out.append(f"::warning title=wheelripe {'upstream' if w.startswith('upstream lookup') else 'index'}::{_gh(w)}")
     return "\n".join(out) + ("\n" if out else "")

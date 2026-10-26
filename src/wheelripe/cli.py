@@ -11,6 +11,7 @@ from . import __version__, report
 from .check import FAILING, run
 from .index import make_fetcher, scrub
 from .inputs import IndexOptions, InputError, collect
+from .tracking import Tracker
 from .tags import DEFAULT_PLATFORMS, PLATFORM_KEYS, Python, explain_one, make_platform, parse_wheel_filename
 
 DEFAULT_PYTHON = "3.15"
@@ -73,6 +74,11 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--index", metavar="URL",
                     help="PyPI JSON API base for a mirror of pypi.org/pypi (default https://pypi.org/pypi, "
                          "env WHEELRIPE_INDEX)")
+    ap.add_argument("--no-tracking", action="store_true",
+                    default=os.environ.get("WHEELRIPE_NO_TRACKING", "").lower() in ("1", "true", "yes"),
+                    help="do not search a blocked package's GitHub repo for its open Python <version> wheels "
+                         "issue/PR (one unauthenticated search per repo; GITHUB_TOKEN or GH_TOKEN raises the "
+                         "rate limit and is sent to api.github.com only). Env WHEELRIPE_NO_TRACKING=1")
     ap.add_argument("--workers", type=int, default=8, help="parallel index requests (default 8)")
     ap.add_argument("-o", "--output", help="write the report to a file instead of stdout")
     ap.add_argument("--summary", help="also append a Markdown summary to this file (e.g. $GITHUB_STEP_SUMMARY)")
@@ -138,7 +144,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         print("wheelripe: no dependencies found", file=sys.stderr)
         return 2
     try:
-        rep = run(deps, fetch, target, plats, sources, pre=ns.pre, workers=ns.workers)
+        tracker = None if ns.no_tracking else Tracker()
+        rep = run(deps, fetch, target, plats, sources, pre=ns.pre, workers=ns.workers, tracker=tracker)
     except RuntimeError as e:
         print(f"wheelripe: {scrub(e)}", file=sys.stderr)
         return 2

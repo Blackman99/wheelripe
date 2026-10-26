@@ -21,7 +21,13 @@ Every item serves GOAL.md: which dependencies stop you moving to a new Python, a
   - Action inputs `index-url` / `extra-index-url`; MCP `index_url` / `extra_index_urls`
   - CI cross-checks the verdicts against pip on the live download.pytorch.org index (3.15, 3.15t)
   - Not yet: `--find-links` / flat directories, `--no-index`, `file://` indexes, keyring credentials, uv's `first-index` strategy (wheelripe pools like pip; for uv.lock it uses each package's locked registry)
-- Upstream tracking: link the open "Python 3.15 wheels" issue/PR in each blocked package's repo
+- ✅ Upstream tracking — shipped on main, not yet released
+  - Blocked / excluded packages link the open issue or PR about the target (`3.15`, `cp315`; free-threading too for `3.15t`) in the GitHub repo named by their PyPI links: text, JSON `tracking`, Markdown, annotations, Action summary, MCP
+  - One search per repo; titles ranked so wheel requests beat test failures, crash reports and dependency bumps; merged/closed shown only when no platform has a wheel ("fixed upstream, waiting for a release"); nothing found → repo + search link
+  - Skipped when only the glibc/macOS floor is the problem, and for non-GitHub projects
+  - Anonymous by default, `GITHUB_TOKEN` / `GH_TOKEN` optional (sent to api.github.com only; a rejected token is dropped); offline / rate limit / errors → one warning, verdicts and exit code unchanged
+  - `--no-tracking` / `WHEELRIPE_NO_TRACKING=1`, Action inputs `tracking` / `github-token`, MCP `tracking`
+  - Not yet: GitLab / Codeberg / other forges, linking the tracker for BUMP packages
 - `wheelripe watch`: a scheduled-workflow recipe that comments on your tracking issue when a blocker clears
 - On-disk cache with ETag revalidation
 

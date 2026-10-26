@@ -58,6 +58,13 @@ FAKE = {
     # 1.0 is yanked (an exact pin still installs it, as in pip); 1.1 is the newest usable release
     "yankpin": project("yankpin", {"1.0": [dict(f, yanked=True) for f in binary("yankpin", "1.0", ["315"])],
                                    "1.1": binary("yankpin", "1.1", ["314"])}),
+    # blocked, upstream on GitLab: no GitHub search
+    "gitlabbed": project("gitlabbed", {"1.0": binary("gitlabbed", "1.0", ["314"])},
+                         urls={"Repository": "https://gitlab.com/acme/gitlabbed"}),
+    # cp315 on Linux only, upstream on GitHub: partly fixed, so only open tracking items count
+    "halfway": project("halfway", {"1.0": binary("halfway", "1.0", ["314"]) + [
+        wheel("halfway", "1.0", "cp315", "cp315", "manylinux_2_28_x86_64")]},
+        urls={"Source": "https://github.com/acme/halfway"}),
     # windows-only package
     "winonly": project("winonly", {"300": binary("winonly", "300", ["314", "315"], plats=["win_amd64"])}),
 }
@@ -73,10 +80,17 @@ INDEX_ENV = ("PIP_INDEX_URL", "PIP_EXTRA_INDEX_URL", "UV_DEFAULT_INDEX", "UV_IND
 
 @pytest.fixture(autouse=True)
 def _no_index_env(monkeypatch, tmp_path):
-    """Tests never inherit the developer's index configuration or ~/.netrc."""
-    for var in INDEX_ENV:
+    """Tests never inherit the developer's index configuration or ~/.netrc, and never search GitHub."""
+    for var in INDEX_ENV + ("GITHUB_TOKEN", "GH_TOKEN"):
         monkeypatch.delenv(var, raising=False)
     monkeypatch.setenv("NETRC", str(tmp_path / "no-netrc"))
+    monkeypatch.setenv("WHEELRIPE_NO_TRACKING", "1")
+    from wheelripe import tracking
+
+    def no_network(*a, **k):
+        raise AssertionError("unit tests must not search GitHub; pass Tracker(opener=...)")
+
+    monkeypatch.setattr(tracking, "_urlopen", no_network)
 
 
 @pytest.fixture

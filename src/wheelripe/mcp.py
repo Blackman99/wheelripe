@@ -15,6 +15,7 @@ from . import __version__, report
 from .check import run
 from .index import make_fetcher, scrub
 from .inputs import IndexOptions, InputError, collect, from_spec
+from .tracking import Tracker
 from .tags import DEFAULT_PLATFORMS, PLATFORM_KEYS, Python, explain_one, make_platform, parse_wheel_filename
 
 SUPPORTED = ("2025-06-18", "2025-03-26", "2024-11-05")
@@ -34,7 +35,8 @@ TOOLS = [
             "version bump that fixes each one. Reads uv.lock / pylock.toml / poetry.lock / Pipfile.lock / "
             "requirements.txt / pyproject.toml from `path`, or checks explicit `requirements` specs. "
             "Statuses: ready, bump (newer release has a wheel), blocked (no release has one: waiting on "
-            "upstream), excluded (requires-python), build (sdist only), skip (marker), missing."),
+            "upstream), excluded (requires-python), build (sdist only), skip (marker), missing. Blocked "
+            "packages carry `tracking`: the upstream issue/PR to watch."),
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -53,6 +55,11 @@ TOOLS = [
                 "extra_index_urls": {"type": "array", "items": {"type": "string"},
                                      "description": "More simple-API indexes; files from all indexes are pooled, "
                                                     "like pip --extra-index-url."},
+                "tracking": {"type": "boolean", "default": True,
+                             "description": "For each blocked package, link the upstream GitHub issue/PR about "
+                                            "wheels for the target Python (packages[].tracking). One GitHub "
+                                            "search per repo; uses GITHUB_TOKEN from the server environment "
+                                            "if set. Never changes a verdict."},
             },
             "additionalProperties": False,
         },
@@ -81,7 +88,7 @@ def _plats(args: Dict[str, Any]):
     return [make_platform(k, glibc=args.get("glibc"), macos=args.get("macos")) for k in keys]
 
 
-def call_tool(name: str, args: Dict[str, Any], fetch=None) -> Dict[str, Any]:
+def call_tool(name: str, args: Dict[str, Any], fetch=None, tracker=None) -> Dict[str, Any]:
     target = Python.parse(args.get("python") or "3.15")
     if name == "explain_wheel":
         tags = parse_wheel_filename(args["filename"])
@@ -107,13 +114,18 @@ def call_tool(name: str, args: Dict[str, Any], fetch=None) -> Dict[str, Any]:
             extra = extra.split()
         if fetch is None:
             fetch = make_fetcher(args.get("index_url"), extra, opts)
-        rep = run(deps, fetch, target, _plats(args), sources)
+        if args.get("tracking", True) is False or os.environ.get("WHEELRIPE_NO_TRACKING", "").lower() in (
+                "1", "true", "yes"):
+            tracker = None
+        elif tracker is None:
+            tracker = Tracker()
+        rep = run(deps, fetch, target, _plats(args), sources, tracker=tracker)
         return {"content": [{"type": "text", "text": report.markdown(rep)}],
                 "structuredContent": rep.to_dict()}
     raise KeyError(name)
 
 
-def handle(msg: Dict[str, Any], fetch=None) -> Optional[Dict[str, Any]]:
+def handle(msg: Dict[str, Any], fetch=None, tracker=None) -> Optional[Dict[str, Any]]:
     mid = msg.get("id")
     method = msg.get("method")
     if mid is None:  # notification
@@ -135,7 +147,7 @@ def handle(msg: Dict[str, Any], fetch=None) -> Optional[Dict[str, Any]]:
         elif method == "tools/call":
             params = msg.get("params") or {}
             try:
-                result = call_tool(params.get("name", ""), params.get("arguments") or {}, fetch)
+                result = call_tool(params.get("name", ""), params.get("arguments") or {}, fetch, tracker)
             except KeyError:
                 return {"jsonrpc": "2.0", "id": mid,
                         "error": {"code": -32602, "message": f"unknown tool {params.get('name')!r}"}}
@@ -148,7 +160,7 @@ def handle(msg: Dict[str, Any], fetch=None) -> Optional[Dict[str, Any]]:
     return {"jsonrpc": "2.0", "id": mid, "result": result}
 
 
-def serve(stdin=None, stdout=None, fetch=None) -> int:
+def serve(stdin=None, stdout=None, fetch=None, tracker=None) -> int:
     stdin = stdin or sys.stdin
     stdout = stdout or sys.stdout
     for line in stdin:
@@ -160,7 +172,7 @@ def serve(stdin=None, stdout=None, fetch=None) -> int:
         except json.JSONDecodeError:
             resp = {"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": "parse error"}}
         else:
-            resp = handle(msg, fetch)
+            resp = handle(msg, fetch, tracker)
         if resp is not None:
             stdout.write(json.dumps(resp) + "\n")
             stdout.flush()

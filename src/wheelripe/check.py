@@ -55,6 +55,7 @@ class Result:
     origin: str = ""
     note: str = ""
     yanked: Optional[bool] = None  # True when an exact pin selects a yanked release
+    tracking: Optional[dict] = None  # upstream issue/PR about wheels for the target (see tracking.py)
 
     def to_dict(self) -> dict:
         d = asdict(self)
@@ -325,9 +326,10 @@ class Report:
 
 
 def run(deps: Sequence[Dep], fetch, target: Python, plats: Sequence[Platform], sources=(),
-        pre: bool = False, workers: int = 8) -> Report:
+        pre: bool = False, workers: int = 8, tracker=None) -> Report:
     """``fetch(name)`` returns a project dict or None; deps that carry the registry their lockfile
-    names (``Dep.index``) are fetched as ``fetch(name, index)``."""
+    names (``Dep.index``) are fetched as ``fetch(name, index)``. ``tracker(repo, target)``, when
+    given, looks up the upstream issue/PR for each blocked package; it never changes a status."""
     keys = sorted({(canonicalize_name(d.name), d.index or "") for d in deps})
 
     def get(key):
@@ -343,4 +345,9 @@ def run(deps: Sequence[Dep], fetch, target: Python, plats: Sequence[Platform], s
     if hasattr(fetch, "describe"):
         rep.indexes = list(fetch.describe())
         rep.warnings = list(fetch.warnings())
+    if tracker is not None:
+        from .tracking import annotate
+        annotate(results, target, tracker)
+        if hasattr(tracker, "warnings"):
+            rep.warnings += tracker.warnings()
     return rep

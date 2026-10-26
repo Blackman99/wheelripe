@@ -39,6 +39,8 @@
 <h2>What you get</h2>
 <div class="rind"><pre><code>$ wheelripe uv.lock --python 3.15
 BLOCKED  confluent-kafka 2.16.0          no cp315 wheel for any target platform (ships cp38–cp314)
+         tracking: open issue #2299 · Python 3.15 support including binary wheels
+                   https://github.com/confluentinc/confluent-kafka-python/issues/2299 · +2 more open
 BUMP     numpy 1.26.4 → 2.5.2            no cp315 wheel in 1.26.4 (ships cp39–cp312); 2.5.2 is the first release with one
 BUMP     pydantic_core 2.41.5 → 2.48.0   no cp315 wheel in 2.41.5 (ships cp39–cp314); 2.48.0 is the first release with one
 READY    1 package (0 with binary wheels · 1 pure Python)
@@ -46,7 +48,7 @@ READY    1 package (0 with binary wheels · 1 pure Python)
 NOT RIPE for CPython 3.15: 1 blocked upstream · 2 need a version bump</code></pre></div>
 <ul class="holes">
 <li><b>BUMP</b> your pinned version has no wheel, a newer release does; wheelripe names the first one.</li>
-<li><b>BLOCKED</b> no release has a wheel yet; you are waiting on upstream (the report links the project).</li>
+<li><b>BLOCKED</b> no release has a wheel yet; you are waiting on upstream, and the report links the open issue or PR asking for the wheels.</li>
 <li><b>EXCLUDED</b> the release's <code>requires-python</code> rules your target out.</li>
 <li><b>BUILD</b> only an sdist exists for any Python; usually fine for pure-Python packages.</li>
 <li><b>READY</b> a matching wheel exists: version-specific, stable ABI (abi3/abi3t) or pure Python.</li>
