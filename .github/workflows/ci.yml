@@ -82,6 +82,20 @@ jobs:
         uses: ./
         with:
           path: examples/requirements-blocked.txt
+      - name: blocked package has a tracking link or a lookup warning
+        # runs before the next action step, which reuses the report path
+        shell: bash
+        env:
+          REPORT: ${{ steps.blocked.outputs.report }}
+        run: |
+          PY=$(command -v python3 || command -v python)
+          "$PY" - <<'PY'
+          import json, os
+          rep = json.load(open(os.environ["REPORT"], encoding="utf-8"))
+          ck = next(p for p in rep["packages"] if p["name"] == "confluent-kafka")
+          print("tracking:", ck.get("tracking"), "warnings:", rep.get("warnings"))
+          assert "tracking" in ck or any(w.startswith("upstream lookup") for w in rep.get("warnings", []))
+          PY
       - name: simple index via inputs
         id: torch
         uses: ./
@@ -98,7 +112,6 @@ jobs:
           test "${{ steps.blocked.outcome }}" = "failure"
           test "${{ steps.blocked.outputs.ripe }}" = "false"
           test "${{ steps.blocked.outputs.bump }}" -ge 2
-
   mcp:
     name: MCP stdio smoke (real PyPI)
     runs-on: ubuntu-latest

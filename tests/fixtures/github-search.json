@@ -1,0 +1,564 @@
+{
+ "confluentinc/confluent-kafka-python": {
+  "total_count": 23,
+  "incomplete_results": false,
+  "items": [
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2365",
+    "number": 2365,
+    "title": "[NOGIL] Update Free Threading Docs",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": "2026-09-24T11:49:41Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/issues/2092",
+    "number": 2092,
+    "title": "Add Free-Threaded Python Support in 3.14",
+    "state": "open",
+    "state_reason": null,
+    "comments": 14
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/issues/2396",
+    "number": 2396,
+    "title": "Please publish Python 3.15, 3.15t wheels",
+    "state": "open",
+    "state_reason": null,
+    "comments": 1
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2347",
+    "number": 2347,
+    "title": "[NOGIL] Add Free Threading Support",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 3,
+    "pull_request": {
+     "merged_at": "2026-09-21T10:53:19Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/issues/2373",
+    "number": 2373,
+    "title": "Python 3.15 Drops Oct 2nd, Please Build Binary Wheels",
+    "state": "open",
+    "state_reason": null,
+    "comments": 1
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/issues/2299",
+    "number": 2299,
+    "title": "Python 3.15 support including binary wheels",
+    "state": "open",
+    "state_reason": null,
+    "comments": 3
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2338",
+    "number": 2338,
+    "title": "[NOGIL][WIP] Add free threading support",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 1,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2335",
+    "number": 2335,
+    "title": "[NOGIL] Exclude Avro tests from running on free threaded python builds",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": "2026-08-28T07:45:27Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2312",
+    "number": 2312,
+    "title": "[NOGIL] Declare cimpl free-threaded on CPython 3.14t",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 3,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2358",
+    "number": 2358,
+    "title": "Add Soak implementation for free threading",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2352",
+    "number": 2352,
+    "title": "[NOGIL] Wheel creation and verification jobs",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 3,
+    "pull_request": {
+     "merged_at": "2026-09-22T09:37:26Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2350",
+    "number": 2350,
+    "title": "[NOGIL] Make Message class methods thread safe",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 3,
+    "pull_request": {
+     "merged_at": "2026-09-18T09:29:03Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2309",
+    "number": 2309,
+    "title": "[NOGIL] Split schema_registry tests to narrow free-threaded test exclusions",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": "2026-07-16T16:02:41Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2304",
+    "number": 2304,
+    "title": "[NOGIL] Add CI verification jobs for free-threaded Python 3.14t",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": "2026-07-16T10:02:20Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2334",
+    "number": 2334,
+    "title": "[NOGIL] Fix borrowed-reference/stale-count races",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 8,
+    "pull_request": {
+     "merged_at": "2026-09-02T12:19:46Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2348",
+    "number": 2348,
+    "title": "[NOGIL][Cherry Pick] Fix borrowed-reference/stale-count races (#2334)",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": "2026-09-07T07:20:40Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2341",
+    "number": 2341,
+    "title": "[NOGIL][DO NOT MERGE] Dev thread free support wheel",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2346",
+    "number": 2346,
+    "title": "[NOGIL][Cherry Pick] Guard AdminClient against concurrent close() vs method-call races",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": "2026-09-04T09:32:33Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2329",
+    "number": 2329,
+    "title": "[NOGIL] Improve Test Coverage for Producer + Some Edge Case Fixes",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": "2026-08-28T19:23:37Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2322",
+    "number": 2322,
+    "title": "[NOGIL] Restrict sharing of Consumer instances across threads",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": "2026-08-25T06:49:39Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/issues/2319",
+    "number": 2319,
+    "title": "Free-threaded (no-GIL) use-after-free in Admin_create_topics: borrowed NewTopic from PyList_GET_ITEM dereferenced as a C struct against a stale count",
+    "state": "closed",
+    "state_reason": "completed",
+    "comments": 7
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2317",
+    "number": 2317,
+    "title": "[NOGIL] Guard AdminClient against concurrent close() vs method-call races",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 3,
+    "pull_request": {
+     "merged_at": "2026-09-01T07:27:01Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/confluentinc/confluent-kafka-python/pull/2313",
+    "number": 2313,
+    "title": "[NOGIL] Fix Producer.close() races with concurrent calls and with itself",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 6,
+    "pull_request": {
+     "merged_at": "2026-08-18T13:18:32Z"
+    }
+   }
+  ]
+ },
+ "pytorch/pytorch": {
+  "total_count": 105,
+  "incomplete_results": false,
+  "items": [
+   {
+    "html_url": "https://github.com/pytorch/pytorch/issues/184352",
+    "number": 184352,
+    "title": "Python 3.15 support for PyTorch",
+    "state": "open",
+    "state_reason": null,
+    "comments": 8
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/issues/201944",
+    "number": 201944,
+    "title": "torch 2.14.1 macOS arm64 cp315 wheel was built against pre-b4 CPython headers: segfault in gil_scoped_acquire::dec_ref on Python 3.15.0",
+    "state": "open",
+    "state_reason": null,
+    "comments": 0
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/200283",
+    "number": 200283,
+    "title": "[dynamo][py315] Support Python 3.15 frozendict subclasses",
+    "state": "open",
+    "state_reason": null,
+    "comments": 1,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/200281",
+    "number": 200281,
+    "title": "[dynamo][py315] Trace Python 3.15 frozendict containers",
+    "state": "open",
+    "state_reason": null,
+    "comments": 3,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/200280",
+    "number": 200280,
+    "title": "[pytree][py315] Support Python 3.15 builtin frozendict",
+    "state": "open",
+    "state_reason": null,
+    "comments": 5,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/200282",
+    "number": 200282,
+    "title": "[dynamo][py315] Support Python 3.15 frozendict operators and hashing",
+    "state": "open",
+    "state_reason": null,
+    "comments": 1,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/issues/180550",
+    "number": 180550,
+    "title": "[Discussion] Parallelizing serial for-loops with free-threaded Python — and the `torch.distributed` challenge",
+    "state": "open",
+    "state_reason": null,
+    "comments": 5
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/issues/55937",
+    "number": 55937,
+    "title": "test_stream_event_nogil: Is the test making a wrong assumption?",
+    "state": "open",
+    "state_reason": null,
+    "comments": 5
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/issues/200666",
+    "number": 200666,
+    "title": "[XPU] Some of test/test_xpu.py tests fail under Python 3.15 due to unrestored environment",
+    "state": "open",
+    "state_reason": null,
+    "comments": 0
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/195583",
+    "number": 195583,
+    "title": "[CI] bump test dependency optree 0.20.0 for Python 3.15 and 3.15t",
+    "state": "open",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/199210",
+    "number": 199210,
+    "title": "[torch] Turn off Dynamo's LRU cache reordering on free-threaded builds",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 5,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/194697",
+    "number": 194697,
+    "title": "Fix the version gate on the free-threaded profiler warning",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 6,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/200320",
+    "number": 200320,
+    "title": "[CD] Depend on triton for Python 3.15 wheels and smoke-test torch.compile on 3.15 and XPU",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": "2026-10-08T20:05:55Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/200294",
+    "number": 200294,
+    "title": "[CD] Depend on triton for Python 3.15 wheels and smoke-test torch.compile on 3.15 and XPU",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 6,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/188103",
+    "number": 188103,
+    "title": "Enable recursive dict-tag guard optimization by default on 3.12+ non-free-threaded",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 3,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/182851",
+    "number": 182851,
+    "title": "[dynamo] Fix free-threading race in dict recursive-tag watcher callback",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/200681",
+    "number": 200681,
+    "title": "[CD] Remove redundant CPython 3.15 builds from all affected manylinux images",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 1,
+    "pull_request": {
+     "merged_at": "2026-10-13T22:26:06Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/200653",
+    "number": 200653,
+    "title": "[CD] Remove redundant CPython 3.15 builds from all affected manylinux images",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 5,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/189722",
+    "number": 189722,
+    "title": "[ROCm] Fix Python 3.15 manywheel build: redirect pkg-config to target Python (ROCm cp315 only)",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 5,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/198018",
+    "number": 198018,
+    "title": "[dynamo, 3.15] Update some error messages",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 6,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/191730",
+    "number": 191730,
+    "title": "[c10d] Fix data race in groupRanks() under free-threading",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 4,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/199356",
+    "number": 199356,
+    "title": "[CD] Build Python 3.15 wheels against CPython 3.15.0rc2",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 3,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/issues/200779",
+    "number": 200779,
+    "title": "[Python 3.15] Segfault on first tensor op in any non-main thread (macOS arm64, Windows x64) — pybind11 gil_scoped_acquire, torch 2.14.1",
+    "state": "closed",
+    "state_reason": "completed",
+    "comments": 2
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/197320",
+    "number": 197320,
+    "title": "[3.15] Use public typing API in flight_recorder",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 3,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/194666",
+    "number": 194666,
+    "title": "Fix Windows py3.15 builds: constrain Cython < 3.3.0 and bump the cp315 numpy pin",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": "2026-08-24T22:07:20Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/194618",
+    "number": 194618,
+    "title": "Fix Windows py3.15 builds: constrain Cython < 3.3.0 and bump the cp315 numpy pin",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 7,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/194762",
+    "number": 194762,
+    "title": "Fix macOS py3.15 wheel builds: pin Cython < 3.3.0 and bump the cp315 numpy pin",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": "2026-08-25T19:12:53Z"
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/194734",
+    "number": 194734,
+    "title": "Fix macOS py3.15 wheel builds: pin Cython < 3.3.0 and bump the cp315 numpy pin",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 7,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/179547",
+    "number": 179547,
+    "title": "  [inductor] Add thread-based compilation support for free-threaded Python (#179547) (#179547) (#179547)",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 16,
+    "pull_request": {
+     "merged_at": null
+    }
+   },
+   {
+    "html_url": "https://github.com/pytorch/pytorch/pull/195789",
+    "number": 195789,
+    "title": "[3.15] Update substitute_in_graph docstring example",
+    "state": "closed",
+    "state_reason": null,
+    "comments": 2,
+    "pull_request": {
+     "merged_at": null
+    }
+   }
+  ]
+ }
+}

@@ -29,6 +29,12 @@ inputs:
   extra-index-url:
     description: 'More simple-API indexes, separated by spaces or newlines; files from every index are pooled, like pip --extra-index-url.'
     default: ''
+  tracking:
+    description: 'Link each blocked package to the open issue/PR in its GitHub repo about wheels for the target Python (one search per repo, never changes a verdict). Set to false to skip the lookup.'
+    default: 'true'
+  github-token:
+    description: 'Token for that search (raises the GitHub search rate limit from 10 to 30 a minute). Sent to api.github.com only. Pass an empty string to search unauthenticated.'
+    default: ${{ github.token }}
 outputs:
   ripe:
     description: '"true" when every dependency installs from a wheel on the target.'
@@ -56,6 +62,8 @@ runs:
         WR_MACOS: ${{ inputs.macos }}
         WR_INDEX_URL: ${{ inputs.index-url }}
         WR_EXTRA_INDEX_URL: ${{ inputs.extra-index-url }}
+        WR_TRACKING: ${{ inputs.tracking }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
         set -u
         PY=$(command -v python3 || command -v python)
@@ -69,6 +77,7 @@ runs:
         [ -n "$WR_GLIBC" ] && args+=(--glibc "$WR_GLIBC")
         [ -n "$WR_MACOS" ] && args+=(--macos "$WR_MACOS")
         [ -n "$WR_INDEX_URL" ] && args+=(--index-url "$WR_INDEX_URL")
+        [ "$WR_TRACKING" = "false" ] && args+=(--no-tracking)
         set -f  # split on whitespace, but never glob a "?" in a URL
         for u in $WR_EXTRA_INDEX_URL; do args+=(--extra-index-url "$u"); done
         set +f

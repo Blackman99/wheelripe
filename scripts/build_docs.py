@@ -37,6 +37,8 @@ P["index"] = f"""
 <h2>What you get</h2>
 {code('''$ wheelripe uv.lock --python 3.15
 BLOCKED  confluent-kafka 2.16.0          no cp315 wheel for any target platform (ships cp38–cp314)
+         tracking: open issue #2299 · Python 3.15 support including binary wheels
+                   https://github.com/confluentinc/confluent-kafka-python/issues/2299 · +2 more open
 BUMP     numpy 1.26.4 → 2.5.2            no cp315 wheel in 1.26.4 (ships cp39–cp312); 2.5.2 is the first release with one
 BUMP     pydantic_core 2.41.5 → 2.48.0   no cp315 wheel in 2.41.5 (ships cp39–cp314); 2.48.0 is the first release with one
 READY    1 package (0 with binary wheels · 1 pure Python)
@@ -44,7 +46,7 @@ READY    1 package (0 with binary wheels · 1 pure Python)
 NOT RIPE for CPython 3.15: 1 blocked upstream · 2 need a version bump''')}
 <ul class="holes">
 <li><b>BUMP</b> your pinned version has no wheel, a newer release does; wheelripe names the first one.</li>
-<li><b>BLOCKED</b> no release has a wheel yet; you are waiting on upstream (the report links the project).</li>
+<li><b>BLOCKED</b> no release has a wheel yet; you are waiting on upstream, and the report links the open issue or PR asking for the wheels.</li>
 <li><b>EXCLUDED</b> the release's <code>requires-python</code> rules your target out.</li>
 <li><b>BUILD</b> only an sdist exists for any Python; usually fine for pure-Python packages.</li>
 <li><b>READY</b> a matching wheel exists: version-specific, stable ABI (abi3/abi3t) or pure Python.</li>
@@ -72,6 +74,7 @@ wheelripe --version''')}
 <p>Nothing to install — use the <a href="usage.html#github-action">GitHub Action</a>. It creates its own virtualenv, so it never touches the Python your job uses.</p>
 <h2 id="network">Network</h2>
 <p>wheelripe makes one HTTPS request per package to the PyPI JSON API (<code>https://pypi.org/pypi/&lt;name&gt;/json</code>), eight in parallel by default. With <code>--index-url</code> / <code>--extra-index-url</code> it asks those simple-API indexes instead (one request per package per index), and PyPI is not contacted unless you list it. Behind a proxy, the usual <code>HTTPS_PROXY</code> variable is honoured; for a private CA, set <code>SSL_CERT_FILE</code>. See <a href="configuration.html#index">Indexes</a>.</p>
+<p>For blocked packages only, it also runs one GitHub search per upstream repository to find the open issue or PR about the new Python (<a href="configuration.html#tracking">upstream tracking</a>). <code>--no-tracking</code> turns that off.</p>
 <p class="next"><a href="usage.html">Usage →</a></p>
 """
 
@@ -114,6 +117,20 @@ orjson-3.13.0-cp315-cp315-manylinux_2_39_x86_64.whl on CPython 3.15t
   no   linux-x86_64       built for the GIL build cp315, not free-threaded cp315t; needs glibc 2.39, your floor is 2.34
   no   macos-arm64        built for the GIL build cp315, not free-threaded cp315t; built for manylinux_2_39_x86_64, not macos-arm64
   no   windows-amd64      ...''')}
+<h3 id="tracking">Upstream tracking</h3>
+<p>A blocked package is one you wait for, so the report says where to watch. For each one, wheelripe takes the project's GitHub repository from its PyPI links and searches it for an issue or PR about your target Python.</p>
+{code('''$ wheelripe confluent-kafka zstandard -p 3.15t
+BLOCKED  confluent-kafka 2.16.0   no cp315t wheel for any target platform (ships cp38–cp314 + cp314t)
+         tracking: open issue #2396 · Please publish Python 3.15, 3.15t wheels
+                   https://github.com/confluentinc/confluent-kafka-python/issues/2396 · +2 more open
+BLOCKED  zstandard 0.25.0         no cp315t wheel for any target platform (ships cp39–cp314)
+         tracking: open issue #354 · Python 3.15 wheels
+                   https://github.com/indygreg/python-zstandard/issues/354 · +2 more open
+
+# nobody has asked yet: you get the repository, so you can file the first issue
+BLOCKED  sometool 1.4.0           no cp315 wheel for any target platform (ships cp39–cp314)
+         upstream: https://github.com/acme/sometool · no open issue or PR about 3.15 found''')}
+<p>The link appears in every output: text, JSON (<code>tracking</code>), the Markdown table, annotations and the MCP result. It never changes a verdict or the exit code. If GitHub is unreachable or rate-limits the search, the report says so once and carries on. Details are on the <a href="configuration.html#tracking">configuration</a> page.</p>
 <h3 id="formats">Output formats</h3>
 <p><code>-f text</code> (default, coloured unless <code>NO_COLOR</code> is set), <code>-f json</code> (<a href="reference.html#json">schema</a>), <code>-f markdown</code> (a table for PR comments or issues), <code>-f github</code> (workflow annotations). <code>--summary FILE</code> and <code>--json-out FILE</code> write extra copies alongside whatever goes to stdout.</p>
 
@@ -148,6 +165,8 @@ jobs:
 <tr><td><code>macos</code></td><td>14</td><td>Oldest macOS you support.</td></tr>
 <tr><td><code>index-url</code></td><td></td><td>Simple-API index to use instead of PyPI, e.g. <code>https://download.pytorch.org/whl/cpu</code>.</td></tr>
 <tr><td><code>extra-index-url</code></td><td></td><td>More simple-API indexes, separated by spaces or newlines; pooled with the first.</td></tr>
+<tr><td><code>tracking</code></td><td><code>true</code></td><td>Link the open upstream issue or PR for each blocked package. <code>false</code> skips the GitHub search.</td></tr>
+<tr><td><code>github-token</code></td><td><code>${{{{ github.token }}}}</code></td><td>Token for that search (30 searches a minute instead of 10). Sent to api.github.com only.</td></tr>
 </tbody></table>
 <p>For a private index, build the URL from repository secrets. GitHub masks them in the log, and wheelripe never prints credentials anyway:</p>
 {code('''- uses: Blackman99/wheelripe@v0.1.0
@@ -163,7 +182,7 @@ jobs:
 <tr><td><code>bump</code></td><td>Count fixed by a version bump.</td></tr>
 <tr><td><code>report</code></td><td>Path to the JSON report.</td></tr>
 </tbody></table>
-<p>The step also writes a Markdown table to the job summary and an annotation per problem package. It runs on Linux, macOS and Windows runners (CI tests all three).</p>
+<p>The step also writes a Markdown table to the job summary and an annotation per problem package; blocked ones carry the upstream tracking link. It runs on Linux, macOS and Windows runners (CI tests all three).</p>
 
 <h2 id="mcp">MCP server</h2>
 <p><code>wheelripe mcp</code> is a read-only stdio MCP server, so an agent can check before it bumps <code>requires-python</code> or a CI matrix.</p>
@@ -178,10 +197,10 @@ jobs:
 <table>
 <thead><tr><th>Tool</th><th>Arguments</th><th>Returns</th></tr></thead>
 <tbody>
-<tr><td><code>check_python_upgrade</code></td><td><code>path</code> or <code>requirements[]</code>, <code>python</code>, <code>platforms[]</code>, <code>glibc</code>, <code>macos</code>, <code>index_url</code>, <code>extra_index_urls[]</code></td><td>Markdown table + the full <a href="reference.html#json">JSON report</a> as structured content.</td></tr>
+<tr><td><code>check_python_upgrade</code></td><td><code>path</code> or <code>requirements[]</code>, <code>python</code>, <code>platforms[]</code>, <code>glibc</code>, <code>macos</code>, <code>index_url</code>, <code>extra_index_urls[]</code>, <code>tracking</code> (default true)</td><td>Markdown table + the full <a href="reference.html#json">JSON report</a> as structured content.</td></tr>
 <tr><td><code>explain_wheel</code></td><td><code>filename</code>, <code>python</code>, <code>platforms[]</code></td><td>Installs yes/no per platform, with the reason.</td></tr>
 </tbody></table>
-<p>Both tools are annotated <code>readOnlyHint</code>; they only read local files and the package index.</p>
+<p>Both tools are annotated <code>readOnlyHint</code>; they only read local files, the package index and, for blocked packages, GitHub search.</p>
 <p class="next"><a href="configuration.html">Configuration →</a></p>
 """
 
@@ -227,6 +246,13 @@ P["configuration"] = f"""
 <tr><td>5xx, timeouts</td><td>Three attempts, then exit code 2.</td></tr>
 </tbody></table>
 <p>Warnings go to stderr, into the JSON report (<code>warnings</code>), the Markdown summary and, with <code>--annotations</code>, a <code>::warning</code> annotation.</p>
+<h2 id="tracking">Upstream tracking</h2>
+<p>For each <code>blocked</code> or <code>excluded</code> package, wheelripe takes the GitHub repository from the package's PyPI links and runs one search for issues and PRs whose title mentions the target (<code>3.15</code> or <code>cp315</code>; for <code>3.15t</code> also free-threading). Open beats closed; then titles that ask directly for the target's wheels beat passing mentions. Test failures, crash reports and dependency bumps are ignored. A merged PR or closed issue is shown only when the package has no wheel on any platform, as “fixed upstream, waiting for a release”.</p>
+<ul>
+<li><b>No search</b> when the only problem is your glibc/macOS floor (a newer system would work, so there is nothing to file upstream), when the project is not on GitHub, or with <code>--no-tracking</code> / <code>WHEELRIPE_NO_TRACKING=1</code>.</li>
+<li><b>Token optional.</b> Without one GitHub allows 10 searches a minute; with <code>GITHUB_TOKEN</code> (or <code>GH_TOKEN</code>) 30. The token goes to <code>api.github.com</code> only and is never printed. A rejected token is dropped and the search retried anonymously.</li>
+<li><b>Never fails the check.</b> Offline, rate-limited or a GitHub error: the affected packages get no link and one warning says why (<code>upstream lookup: …</code>). Verdicts and the exit code are the same as with <code>--no-tracking</code>.</li>
+</ul>
 <h2 id="env">Environment variables</h2>
 <table><thead><tr><th>Variable</th><th>Effect</th></tr></thead><tbody>
 <tr><td><code>WHEELRIPE_PYTHON</code></td><td>Default for <code>--python</code>.</td></tr>
@@ -234,6 +260,8 @@ P["configuration"] = f"""
 <tr><td><code>PIP_INDEX_URL</code>, <code>UV_DEFAULT_INDEX</code>, <code>UV_INDEX_URL</code></td><td>Main simple index when neither <code>--index-url</code> nor a requirements-file <code>-i</code> is given.</td></tr>
 <tr><td><code>PIP_EXTRA_INDEX_URL</code>, <code>UV_INDEX</code>, <code>UV_EXTRA_INDEX_URL</code></td><td>Extra simple indexes (space-separated; <code>UV_INDEX</code> entries may be <code>name=url</code>).</td></tr>
 <tr><td><code>NETRC</code></td><td>netrc file with index credentials (default <code>~/.netrc</code>).</td></tr>
+<tr><td><code>GITHUB_TOKEN</code>, <code>GH_TOKEN</code></td><td>Optional token for the <a href="#tracking">upstream tracking</a> search.</td></tr>
+<tr><td><code>WHEELRIPE_NO_TRACKING</code></td><td><code>1</code> = <code>--no-tracking</code>.</td></tr>
 <tr><td><code>NO_COLOR</code></td><td>Plain text output.</td></tr>
 <tr><td><code>HTTPS_PROXY</code></td><td>Standard proxy support.</td></tr>
 <tr><td><code>SSL_CERT_FILE</code></td><td>CA bundle for an index behind a private certificate authority.</td></tr>
@@ -268,6 +296,7 @@ wheelripe mcp''')}
 <tr><td><code>-i, --index-url URL</code></td><td>PyPI</td><td>Simple-API index (PEP 691/503) to use instead of PyPI. Credentials in the URL are never printed.</td></tr>
 <tr><td><code>--extra-index-url URL</code></td><td></td><td>One more simple-API index; repeatable; files are pooled.</td></tr>
 <tr><td><code>--index URL</code></td><td>https://pypi.org/pypi</td><td>PyPI JSON API base, for a mirror of it.</td></tr>
+<tr><td><code>--no-tracking</code></td><td></td><td>Skip the GitHub search for blocked packages' upstream issue or PR.</td></tr>
 <tr><td><code>--workers N</code></td><td>8</td><td>Parallel index requests.</td></tr>
 <tr><td><code>-o, --output FILE</code></td><td>stdout</td><td>Write the report to a file.</td></tr>
 <tr><td><code>--summary FILE</code></td><td></td><td>Append a Markdown summary (e.g. <code>$GITHUB_STEP_SUMMARY</code>).</td></tr>
@@ -328,10 +357,21 @@ wheelripe mcp''')}
       "requires_python": ">=3.9",
       "upstream": "https://github.com/numpy/numpy",
       "origin": "uv.lock"
+    },
+    {
+      "name": "confluent-kafka", "version": "2.16.0", "status": "blocked",
+      "upstream": "https://github.com/confluentinc/confluent-kafka-python",
+      "tracking": {
+        "url": "https://github.com/confluentinc/confluent-kafka-python/issues/2299",
+        "number": 2299, "kind": "issue", "state": "open",
+        "title": "Python 3.15 support including binary wheels", "others": 2,
+        "search": "https://github.com/confluentinc/confluent-kafka-python/issues?q=3.15%20in%3Atitle"
+      }
     }
   ]
 }''')}
-<p>Packages are sorted worst first. Fields that do not apply are omitted. Two top-level fields appear only when they have something to say: <code>indexes</code> (the indexes consulted, redacted, when anything besides PyPI was used, e.g. <code>["download.pytorch.org/whl/cpu", "pypi.org"]</code>) and <code>warnings</code> (index problems such as a 401, also printed to stderr).</p>
+<p>Packages are sorted worst first. Fields that do not apply are omitted. Two top-level fields appear only when they have something to say: <code>indexes</code> (the indexes consulted, redacted, when anything besides PyPI was used, e.g. <code>["download.pytorch.org/whl/cpu", "pypi.org"]</code>) and <code>warnings</code> (index problems such as a 401, or an upstream lookup that could not run; also printed to stderr).</p>
+<p><code>tracking</code> appears on blocked and excluded packages when a search ran: <code>state</code> is <code>open</code>, <code>merged</code> or <code>closed</code>, <code>kind</code> is <code>issue</code> or <code>pr</code>, <code>others</code> counts further open matches. When nothing matched it holds only <code>search</code>, a link to run the search yourself. No <code>tracking</code> key means no search ran.</p>
 <p class="next"><a href="faq.html">FAQ →</a></p>
 """
 
@@ -379,7 +419,7 @@ B["which-dependencies-block-python-3-15"] = f"""
 BLOCKED  confluent-kafka 2.16.0          no cp315 wheel for any target platform (ships cp38–cp314)
 BUMP     numpy 1.26.4 → 2.5.2            no cp315 wheel in 1.26.4 (ships cp39–cp312); 2.5.2 is the first release with one
 NOT RIPE for CPython 3.15: 1 blocked upstream · 1 needs a version bump''')}
-<p>The useful distinction is <b>bump</b> versus <b>blocked</b>. A bump you can do today. A blocker you wait on — the report links the upstream project so you can watch it.</p>
+<p>The useful distinction is <b>bump</b> versus <b>blocked</b>. A bump you can do today. A blocker you wait on — the report links the open upstream issue or PR asking for 3.15 wheels, so you know where to watch, or that nobody has asked yet.</p>
 <h2>Trusting the answer</h2>
 <p>Tag matching has corners: manylinux floors, legacy aliases, universal2, abi3 on free-threaded builds, compressed tag sets. So wheelripe's CI asks pip itself (<code>--dry-run --only-binary=:all:</code> with explicit Python/ABI/platform) about 26 real packages on 7 platforms for both 3.15 and 3.15t, and installs on real 3.15/3.15t interpreters. Any disagreement turns CI red.</p>
 <h2>Make CI tell you</h2>
@@ -398,7 +438,7 @@ B["python-3-15-wheel-check-zh"] = f"""
 <h2>wheelripe 做什么</h2>
 <p>读取 lockfile（uv、PEP 751、Poetry、Pipenv、requirements、pyproject），每个包向 PyPI JSON API 发一次请求，按 pip 的规则逐平台匹配解释器、ABI（含 PEP 803 的 <code>abi3t</code>）和平台标签（含 glibc / macOS 下限）。</p>
 {code('''$ uvx --from git+https://github.com/Blackman99/wheelripe wheelripe uv.lock -p 3.15t''')}
-<p>关键是区分 <b>BUMP</b>（升到某个版本就有 wheel，今天就能改）和 <b>BLOCKED</b>（任何版本都还没有，只能等上游；报告里附上游链接）。</p>
+<p>关键是区分 <b>BUMP</b>（升到某个版本就有 wheel，今天就能改）和 <b>BLOCKED</b>（任何版本都还没有，只能等上游；报告会附上上游仓库里讨论 3.15 wheel 的 issue 或 PR，没人提过就给出仓库链接）。</p>
 <h2>结果可信吗</h2>
 <p>CI 每次提交都会让 pip 本身（<code>--dry-run --only-binary=:all:</code>，显式指定 Python/ABI/平台）对 26 个真实包、7 个平台、3.15 与 3.15t 逐一给出答案，与 wheelripe 不一致就失败；还会在真实的 3.15 / 3.15t 解释器上安装验证。</p>
 <h2>让 CI 每周告诉你</h2>

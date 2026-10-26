@@ -71,6 +71,20 @@ orjson-3.13.0-cp315-cp315-manylinux_2_39_x86_64.whl on CPython 3.15t
   no   linux-x86_64       built for the GIL build cp315, not free-threaded cp315t; needs glibc 2.39, your floor is 2.34
   no   macos-arm64        built for the GIL build cp315, not free-threaded cp315t; built for manylinux_2_39_x86_64, not macos-arm64
   no   windows-amd64      ...</code></pre></div>
+<h3 id="tracking">Upstream tracking</h3>
+<p>A blocked package is one you wait for, so the report says where to watch. For each one, wheelripe takes the project's GitHub repository from its PyPI links and searches it for an issue or PR about your target Python.</p>
+<div class="rind"><pre><code>$ wheelripe confluent-kafka zstandard -p 3.15t
+BLOCKED  confluent-kafka 2.16.0   no cp315t wheel for any target platform (ships cp38–cp314 + cp314t)
+         tracking: open issue #2396 · Please publish Python 3.15, 3.15t wheels
+                   https://github.com/confluentinc/confluent-kafka-python/issues/2396 · +2 more open
+BLOCKED  zstandard 0.25.0         no cp315t wheel for any target platform (ships cp39–cp314)
+         tracking: open issue #354 · Python 3.15 wheels
+                   https://github.com/indygreg/python-zstandard/issues/354 · +2 more open
+
+<span class="c"># nobody has asked yet: you get the repository, so you can file the first issue</span>
+BLOCKED  sometool 1.4.0           no cp315 wheel for any target platform (ships cp39–cp314)
+         upstream: https://github.com/acme/sometool · no open issue or PR about 3.15 found</code></pre></div>
+<p>The link appears in every output: text, JSON (<code>tracking</code>), the Markdown table, annotations and the MCP result. It never changes a verdict or the exit code. If GitHub is unreachable or rate-limits the search, the report says so once and carries on. Details are on the <a href="configuration.html#tracking">configuration</a> page.</p>
 <h3 id="formats">Output formats</h3>
 <p><code>-f text</code> (default, coloured unless <code>NO_COLOR</code> is set), <code>-f json</code> (<a href="reference.html#json">schema</a>), <code>-f markdown</code> (a table for PR comments or issues), <code>-f github</code> (workflow annotations). <code>--summary FILE</code> and <code>--json-out FILE</code> write extra copies alongside whatever goes to stdout.</p>
 
@@ -105,6 +119,8 @@ jobs:
 <tr><td><code>macos</code></td><td>14</td><td>Oldest macOS you support.</td></tr>
 <tr><td><code>index-url</code></td><td></td><td>Simple-API index to use instead of PyPI, e.g. <code>https://download.pytorch.org/whl/cpu</code>.</td></tr>
 <tr><td><code>extra-index-url</code></td><td></td><td>More simple-API indexes, separated by spaces or newlines; pooled with the first.</td></tr>
+<tr><td><code>tracking</code></td><td><code>true</code></td><td>Link the open upstream issue or PR for each blocked package. <code>false</code> skips the GitHub search.</td></tr>
+<tr><td><code>github-token</code></td><td><code>${{ github.token }}</code></td><td>Token for that search (30 searches a minute instead of 10). Sent to api.github.com only.</td></tr>
 </tbody></table>
 <p>For a private index, build the URL from repository secrets. GitHub masks them in the log, and wheelripe never prints credentials anyway:</p>
 <div class="rind"><pre><code>- uses: Blackman99/wheelripe@v0.1.0
@@ -120,7 +136,7 @@ jobs:
 <tr><td><code>bump</code></td><td>Count fixed by a version bump.</td></tr>
 <tr><td><code>report</code></td><td>Path to the JSON report.</td></tr>
 </tbody></table>
-<p>The step also writes a Markdown table to the job summary and an annotation per problem package. It runs on Linux, macOS and Windows runners (CI tests all three).</p>
+<p>The step also writes a Markdown table to the job summary and an annotation per problem package; blocked ones carry the upstream tracking link. It runs on Linux, macOS and Windows runners (CI tests all three).</p>
 
 <h2 id="mcp">MCP server</h2>
 <p><code>wheelripe mcp</code> is a read-only stdio MCP server, so an agent can check before it bumps <code>requires-python</code> or a CI matrix.</p>
@@ -135,10 +151,10 @@ jobs:
 <table>
 <thead><tr><th>Tool</th><th>Arguments</th><th>Returns</th></tr></thead>
 <tbody>
-<tr><td><code>check_python_upgrade</code></td><td><code>path</code> or <code>requirements[]</code>, <code>python</code>, <code>platforms[]</code>, <code>glibc</code>, <code>macos</code>, <code>index_url</code>, <code>extra_index_urls[]</code></td><td>Markdown table + the full <a href="reference.html#json">JSON report</a> as structured content.</td></tr>
+<tr><td><code>check_python_upgrade</code></td><td><code>path</code> or <code>requirements[]</code>, <code>python</code>, <code>platforms[]</code>, <code>glibc</code>, <code>macos</code>, <code>index_url</code>, <code>extra_index_urls[]</code>, <code>tracking</code> (default true)</td><td>Markdown table + the full <a href="reference.html#json">JSON report</a> as structured content.</td></tr>
 <tr><td><code>explain_wheel</code></td><td><code>filename</code>, <code>python</code>, <code>platforms[]</code></td><td>Installs yes/no per platform, with the reason.</td></tr>
 </tbody></table>
-<p>Both tools are annotated <code>readOnlyHint</code>; they only read local files and the package index.</p>
+<p>Both tools are annotated <code>readOnlyHint</code>; they only read local files, the package index and, for blocked packages, GitHub search.</p>
 <p class="next"><a href="configuration.html">Configuration →</a></p>
 </main></div><footer class="foot"><p>wheelripe · MIT · <a href="https://github.com/Blackman99/wheelripe">GitHub</a> · <a href="https://github.com/Blackman99/wheelripe/issues">Issues</a></p></footer>
 </body>

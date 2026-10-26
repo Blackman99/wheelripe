@@ -64,6 +64,10 @@ def frame(lines, cursor=False):
                 d.text((PAD, y), head, font=bold, fill=col)
                 d.text((PAD + font.getlength(head), y), text[9:], font=font,
                        fill=PASTE if not text.strip().startswith("upstream") else MUTED)
+            elif text.lstrip().startswith("tracking: "):
+                lead = text[:len(text) - len(text.lstrip())] + "tracking: "
+                d.text((PAD, y), lead, font=font, fill=VEIN)
+                d.text((PAD + font.getlength(lead), y), text[len(lead):], font=font, fill=PASTE)
             else:
                 d.text((PAD, y), text, font=font, fill=col)
         y += LH

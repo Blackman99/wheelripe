@@ -43,7 +43,7 @@
 BLOCKED  confluent-kafka 2.16.0          no cp315 wheel for any target platform (ships cp38–cp314)
 BUMP     numpy 1.26.4 → 2.5.2            no cp315 wheel in 1.26.4 (ships cp39–cp312); 2.5.2 is the first release with one
 NOT RIPE for CPython 3.15: 1 blocked upstream · 1 needs a version bump</code></pre></div>
-<p>The useful distinction is <b>bump</b> versus <b>blocked</b>. A bump you can do today. A blocker you wait on — the report links the upstream project so you can watch it.</p>
+<p>The useful distinction is <b>bump</b> versus <b>blocked</b>. A bump you can do today. A blocker you wait on — the report links the open upstream issue or PR asking for 3.15 wheels, so you know where to watch, or that nobody has asked yet.</p>
 <h2>Trusting the answer</h2>
 <p>Tag matching has corners: manylinux floors, legacy aliases, universal2, abi3 on free-threaded builds, compressed tag sets. So wheelripe's CI asks pip itself (<code>--dry-run --only-binary=:all:</code> with explicit Python/ABI/platform) about 26 real packages on 7 platforms for both 3.15 and 3.15t, and installs on real 3.15/3.15t interpreters. Any disagreement turns CI red.</p>
 <h2>Make CI tell you</h2>

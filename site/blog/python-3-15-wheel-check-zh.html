@@ -40,7 +40,7 @@
 <h2>wheelripe 做什么</h2>
 <p>读取 lockfile（uv、PEP 751、Poetry、Pipenv、requirements、pyproject），每个包向 PyPI JSON API 发一次请求，按 pip 的规则逐平台匹配解释器、ABI（含 PEP 803 的 <code>abi3t</code>）和平台标签（含 glibc / macOS 下限）。</p>
 <div class="rind"><pre><code>$ uvx --from git+https://github.com/Blackman99/wheelripe wheelripe uv.lock -p 3.15t</code></pre></div>
-<p>关键是区分 <b>BUMP</b>（升到某个版本就有 wheel，今天就能改）和 <b>BLOCKED</b>（任何版本都还没有，只能等上游；报告里附上游链接）。</p>
+<p>关键是区分 <b>BUMP</b>（升到某个版本就有 wheel，今天就能改）和 <b>BLOCKED</b>（任何版本都还没有，只能等上游；报告会附上上游仓库里讨论 3.15 wheel 的 issue 或 PR，没人提过就给出仓库链接）。</p>
 <h2>结果可信吗</h2>
 <p>CI 每次提交都会让 pip 本身（<code>--dry-run --only-binary=:all:</code>，显式指定 Python/ABI/平台）对 26 个真实包、7 个平台、3.15 与 3.15t 逐一给出答案，与 wheelripe 不一致就失败；还会在真实的 3.15 / 3.15t 解释器上安装验证。</p>
 <h2>让 CI 每周告诉你</h2>

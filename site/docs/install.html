@@ -50,6 +50,7 @@ wheelripe --version</code></pre></div>
 <p>Nothing to install — use the <a href="usage.html#github-action">GitHub Action</a>. It creates its own virtualenv, so it never touches the Python your job uses.</p>
 <h2 id="network">Network</h2>
 <p>wheelripe makes one HTTPS request per package to the PyPI JSON API (<code>https://pypi.org/pypi/&lt;name&gt;/json</code>), eight in parallel by default. With <code>--index-url</code> / <code>--extra-index-url</code> it asks those simple-API indexes instead (one request per package per index), and PyPI is not contacted unless you list it. Behind a proxy, the usual <code>HTTPS_PROXY</code> variable is honoured; for a private CA, set <code>SSL_CERT_FILE</code>. See <a href="configuration.html#index">Indexes</a>.</p>
+<p>For blocked packages only, it also runs one GitHub search per upstream repository to find the open issue or PR about the new Python (<a href="configuration.html#tracking">upstream tracking</a>). <code>--no-tracking</code> turns that off.</p>
 <p class="next"><a href="usage.html">Usage →</a></p>
 </main></div><footer class="foot"><p>wheelripe · MIT · <a href="https://github.com/Blackman99/wheelripe">GitHub</a> · <a href="https://github.com/Blackman99/wheelripe/issues">Issues</a></p></footer>
 </body>
